@@ -10,39 +10,26 @@ import (
 	"time"
 
 	"github.com/LeeDark/go-microservices-starter/handlers"
+	"github.com/gorilla/mux"
 )
 
 func main() {
-	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-	// 	log.Println("Hello, World!")
-
-	// 	d, err := io.ReadAll(r.Body)
-	// 	if err != nil {
-	// 		http.Error(w, "Failed to read request body", http.StatusBadRequest)
-	// 		return
-	// 	}
-
-	// 	log.Printf("Data %s\n", d)
-
-	// 	//w.Write([]byte("Hello, World!"))
-	// 	fmt.Fprintf(w, "Hello %s!", d)
-	// })
-
-	// http.HandleFunc("/goodbye", func(w http.ResponseWriter, r *http.Request) {
-	// 	log.Println("Goodbye, World!")
-	// 	w.Write([]byte("Goodbye, World!"))
-	// })
-
 	l := log.New(os.Stdout, "miscroservice ", log.LstdFlags)
 
-	// hh := handlers.NewHello(l)
-	// gh := handlers.NewGoodbye(l)
 	ph := handlers.NewProducts(l)
 
-	sm := http.NewServeMux()
-	// sm.Handle("/", hh)
-	// sm.Handle("/goodbye", gh)
-	sm.Handle("/", ph)
+	sm := mux.NewRouter()
+
+	getRouter := sm.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/", ph.GetProducts)
+
+	putRouter := sm.Methods(http.MethodPut).Subrouter()
+	putRouter.HandleFunc("/{id:[0-9]+}", ph.UpdateProduct)
+	putRouter.Use(ph.MiddlewareValidateProduct)
+
+	postRouter := sm.Methods(http.MethodPost).Subrouter()
+	postRouter.HandleFunc("/", ph.AddProduct)
+	postRouter.Use(ph.MiddlewareValidateProduct)
 
 	s := &http.Server{
 		Addr:         ":9090",
