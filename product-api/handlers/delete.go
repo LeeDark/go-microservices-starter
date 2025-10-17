@@ -2,10 +2,8 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/LeeDark/go-microservices-starter/data"
-	"github.com/gorilla/mux"
 )
 
 // swagger:route DELETE /products/{id} products deleteProduct
@@ -16,25 +14,28 @@ import (
 // Responses:
 //   204: noContentResponse
 
-// DeleteProduct deletes a product from the data store
-func (p *Products) DeleteProduct(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		http.Error(w, "Unable to convert id", http.StatusBadRequest)
-		return
-	}
+// Delete handles DELETE requests and removes items from the database
+func (p *Products) Delete(rw http.ResponseWriter, r *http.Request) {
+	id := getProductID(r)
 
-	p.l.Println("Handle DELETE Product", id)
+	p.l.Println("[DEBUG] deleting record id", id)
 
-	err = data.DeleteProduct(id)
+	err := data.DeleteProduct(id)
 	if err == data.ErrProductNotFound {
-		http.Error(w, "Product not found", http.StatusNotFound)
+		p.l.Println("[ERROR] deleting record id does not exist")
+
+		rw.WriteHeader(http.StatusNotFound)
+		data.ToJSON(&GenericError{Message: err.Error()}, rw)
 		return
 	}
 
 	if err != nil {
-		http.Error(w, "Product not found", http.StatusInternalServerError)
+		p.l.Println("[ERROR] deleting record", err)
+
+		rw.WriteHeader(http.StatusInternalServerError)
+		data.ToJSON(&GenericError{Message: err.Error()}, rw)
 		return
 	}
+
+	rw.WriteHeader(http.StatusNoContent)
 }

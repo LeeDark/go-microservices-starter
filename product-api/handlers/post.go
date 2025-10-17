@@ -6,8 +6,8 @@ import (
 	"github.com/LeeDark/go-microservices-starter/data"
 )
 
-// swagger:route POST /products products addProduct
-// Adds a new product to the system
+// swagger:route POST /products products createProduct
+// Create a new product
 //
 // This will add a new product to the data store
 //
@@ -16,13 +16,11 @@ import (
 //   422: errorValidation
 //   501: errorResponse
 
-// AddProduct adds a new product to the data store
-func (p *Products) AddProduct(w http.ResponseWriter, r *http.Request) {
-	p.l.Println("Handle POST Product")
-
-	prod := r.Context().Value(KeyProduct{}).(*data.Product)
+// Create handles POST requests to add new products
+func (p *Products) Create(rw http.ResponseWriter, r *http.Request) {
+	// fetch the product from the context
+	prod := r.Context().Value(KeyProduct{}).(data.Product)
 
 	p.l.Printf("[DEBUG] Inserting product: %#v\n", prod)
-
 	data.AddProduct(prod)
 }

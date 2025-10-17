@@ -15,7 +15,7 @@ definitions:
         properties:
             description:
                 description: the description for this product
-                example: Frothy milky coffee
+                maxLength: 10000
                 type: string
                 x-go-name: Description
             id:
@@ -26,24 +26,22 @@ definitions:
                 x-go-name: ID
             name:
                 description: the name for this product
-                example: Lattee
+                maxLength: 255
                 type: string
                 x-go-name: Name
             price:
                 description: the price for the product
-                example: 2.45
                 format: float
+                minimum: 0.01
                 type: number
                 x-go-name: Price
             sku:
                 description: the SKU for the product
-                example: abc-abc-abc
+                pattern: '[a-z]+-[a-z]+-[a-z]+'
                 type: string
                 x-go-name: SKU
         required:
-            - id
             - name
-            - description
             - price
             - sku
         type: object
@@ -59,7 +57,7 @@ definitions:
         type: object
         x-go-package: github.com/LeeDark/go-microservices-starter/handlers
 info:
-    description: '# Documentation for Product API'
+    description: Documentation for Product API
     title: of Product API
     version: 1.0.0
 paths:
@@ -70,12 +68,21 @@ paths:
             responses:
                 "200":
                     $ref: '#/responses/productsResponse'
-            summary: Returns a list of products
+            summary: Return a list of products from the database
             tags:
                 - products
         post:
             description: This will add a new product to the data store
-            operationId: addProduct
+            operationId: createProduct
+            parameters:
+                - description: |-
+                    Product data structure to Update or Create.
+                    Note: the id field is ignored by update and create operations
+                  in: body
+                  name: Body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/Product'
             responses:
                 "200":
                     $ref: '#/responses/productResponse'
@@ -83,7 +90,7 @@ paths:
                     $ref: '#/responses/errorValidation'
                 "501":
                     $ref: '#/responses/errorResponse'
-            summary: Adds a new product to the system
+            summary: Create a new product
             tags:
                 - products
     /products/{id}:
@@ -122,7 +129,7 @@ paths:
                     $ref: '#/responses/errorResponse'
                 "422":
                     $ref: '#/responses/errorValidation'
-            summary: Updates a product in the system
+            summary: Update a products details
             tags:
                 - products
 produces:
