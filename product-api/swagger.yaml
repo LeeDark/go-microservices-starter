@@ -3,13 +3,14 @@ consumes:
     - application/json
 definitions:
     GenericError:
-        description: GenericError is a generic error message returned by a server
+        description: GenericError GenericError is a generic error message returned by a server
         properties:
             message:
+                description: message
                 type: string
                 x-go-name: Message
         type: object
-        x-go-package: github.com/LeeDark/go-microservices-starter/handlers
+        x-go-package: github.com/LeeDark/go-microservices-starter/sdk/models
     Product:
         description: Product defines the structure for an API product
         properties:
@@ -47,15 +48,16 @@ definitions:
         type: object
         x-go-package: github.com/LeeDark/go-microservices-starter/data
     ValidationError:
-        description: ValidationError is a collection of validation error messages
+        description: ValidationError ValidationError is a collection of validation error messages
         properties:
             messages:
+                description: messages
                 items:
                     type: string
                 type: array
                 x-go-name: Messages
         type: object
-        x-go-package: github.com/LeeDark/go-microservices-starter/handlers
+        x-go-package: github.com/LeeDark/go-microservices-starter/sdk/models
 info:
     description: Documentation for Product API
     title: of Product API
@@ -93,16 +95,6 @@ paths:
             summary: Create a new product
             tags:
                 - products
-    /products/{id}:
-        delete:
-            description: Deletes a product from the data store
-            operationId: deleteProduct
-            responses:
-                "204":
-                    $ref: '#/responses/noContentResponse'
-            summary: Deletes a product from the system
-            tags:
-                - products
         put:
             description: This will update a product in the data store
             operationId: updateProduct
@@ -115,6 +107,21 @@ paths:
                   required: true
                   schema:
                     $ref: '#/definitions/Product'
+            responses:
+                "204":
+                    $ref: '#/responses/noContentResponse'
+                "404":
+                    $ref: '#/responses/errorResponse'
+                "422":
+                    $ref: '#/responses/errorValidation'
+            summary: Update a products details
+            tags:
+                - products
+    /products/{id}:
+        delete:
+            description: Deletes a product from the data store
+            operationId: deleteProduct
+            parameters:
                 - description: The id of the product for which the operation relates
                   format: int64
                   in: path
@@ -125,11 +132,25 @@ paths:
             responses:
                 "204":
                     $ref: '#/responses/noContentResponse'
+            summary: Deletes a product from the system
+            tags:
+                - products
+        get:
+            description: Return a list of products from the database
+            operationId: listSingleProduct
+            parameters:
+                - description: The id of the product for which the operation relates
+                  format: int64
+                  in: path
+                  name: id
+                  required: true
+                  type: integer
+                  x-go-name: ID
+            responses:
+                "200":
+                    $ref: '#/responses/productResponse'
                 "404":
                     $ref: '#/responses/errorResponse'
-                "422":
-                    $ref: '#/responses/errorValidation'
-            summary: Update a products details
             tags:
                 - products
 produces:
