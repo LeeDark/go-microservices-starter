@@ -13,15 +13,41 @@ import (
 var ErrProductNotFound = errors.New("product not found")
 
 // Product defines the structure for an API product
+// swagger:model
 type Product struct {
-	ID          int     `json:"id"`
-	Name        string  `json:"name" validate:"required"`
-	Description string  `json:"description"`
-	Price       float32 `json:"price" validate:"gt=0"`
-	SKU         string  `json:"sku" validate:"required,sku"`
-	CreatedOn   string  `json:"-"`
-	UpdatedOn   string  `json:"-"`
-	DeletedOn   string  `json:"-"`
+	// the id for the product
+	//
+	// required: true
+	// min: 1
+	ID int `json:"id"`
+
+	// the name for this product
+	//
+	// required: true
+	// example: Lattee
+	Name string `json:"name" validate:"required"`
+
+	// the description for this product
+	//
+	// required: true
+	// example: Frothy milky coffee
+	Description string `json:"description"`
+
+	// the price for the product
+	//
+	// required: true
+	// example: 2.45
+	Price float32 `json:"price" validate:"gt=0"`
+
+	// the SKU for the product
+	//
+	// required: true
+	// example: abc-abc-abc
+	SKU string `json:"sku" validate:"required,sku"`
+
+	CreatedOn string `json:"-"`
+	UpdatedOn string `json:"-"`
+	DeletedOn string `json:"-"`
 }
 
 func (p *Product) FromJSON(r io.Reader) error {
@@ -97,6 +123,15 @@ func UpdateProduct(id int, p *Product) error {
 	}
 	p.ID = id
 	productList[pos] = p
+	return nil
+}
+
+func DeleteProduct(id int) error {
+	_, pos, err := findProduct(id)
+	if err != nil {
+		return err
+	}
+	productList = append(productList[:pos], productList[pos+1:]...)
 	return nil
 }
 

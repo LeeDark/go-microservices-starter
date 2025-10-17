@@ -1,93 +1,42 @@
+// Package classification of Product API
+//
+// # Documentation for Product API
+//
+// Schemes: http
+// BasePath: /
+// Version: 1.0.0
+//
+// Consumes:
+// - application/json
+//
+// Produces:
+// - application/json
+// swagger:meta
 package handlers
 
 import (
-	"context"
 	"log"
-	"net/http"
-	"strconv"
-
-	"github.com/LeeDark/go-microservices-starter/data"
-	"github.com/gorilla/mux"
 )
 
+// KeyProduct is a key used for the product in the context
+type KeyProduct struct{}
+
+// Products defines the product handler
 type Products struct {
 	l *log.Logger
 }
 
+// NewProducts creates a new products handler with the given logger
 func NewProducts(l *log.Logger) *Products {
 	return &Products{l}
 }
 
-func (p *Products) GetProducts(w http.ResponseWriter, r *http.Request) {
-	p.l.Println("Handle GET Products")
-
-	lp := data.GetProducts()
-
-	err := lp.ToJSON(w)
-	if err != nil {
-		http.Error(w, "Unable to marshal json", http.StatusInternalServerError)
-		return
-	}
+// GenericError is a generic error message returned by a server
+type GenericError struct {
+	Message string `json:"message"`
 }
 
-func (p *Products) AddProduct(w http.ResponseWriter, r *http.Request) {
-	p.l.Println("Handle POST Product")
-
-	prod := r.Context().Value(KeyProduct{}).(*data.Product)
-
-	p.l.Printf("Prod: %#v", prod)
-
-	data.AddProduct(prod)
-}
-
-func (p *Products) UpdateProduct(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		http.Error(w, "Unable to convert id", http.StatusBadRequest)
-		return
-	}
-
-	p.l.Println("Handle PUT Product", id)
-
-	prod := r.Context().Value(KeyProduct{}).(*data.Product)
-
-	err = data.UpdateProduct(id, prod)
-	if err == data.ErrProductNotFound {
-		http.Error(w, "Product not found", http.StatusNotFound)
-		return
-	}
-
-	if err != nil {
-		http.Error(w, "Product not found", http.StatusInternalServerError)
-		return
-	}
-}
-
-type KeyProduct struct{}
-
-func (p Products) MiddlewareValidateProduct(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		prod := &data.Product{}
-
-		err := prod.FromJSON(r.Body)
-		if err != nil {
-			p.l.Println("[ERROR] deserializing product", err)
-			http.Error(w, "Unable unmarshal json", http.StatusBadRequest)
-			return
-		}
-
-		// validate the product
-		err = prod.Validate()
-		if err != nil {
-			p.l.Println("[ERROR] validating product", err)
-			http.Error(w, "Error validating product: "+err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		ctx := context.WithValue(r.Context(), KeyProduct{}, prod)
-		req := r.WithContext(ctx)
-
-		next.ServeHTTP(w, req)
-	})
+// ValidationError is a collection of validation error messages
+type ValidationError struct {
+	Messages []string `json:"messages"`
 }
