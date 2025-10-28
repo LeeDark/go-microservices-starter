@@ -12,6 +12,7 @@ import (
 	"github.com/LeeDark/go-microservices-starter/data"
 	"github.com/LeeDark/go-microservices-starter/handlers"
 	"github.com/go-openapi/runtime/middleware"
+	gohandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -48,10 +49,13 @@ func main() {
 	getR.Handle("/docs", sh)
 	getR.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
 
+	// CORS
+	ch := gohandlers.CORS(gohandlers.AllowedOrigins([]string{"http://localhost:3001"}), gohandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"}))
+
 	// create a new server
 	s := &http.Server{
 		Addr:         ":9090",
-		Handler:      sm,
+		Handler:      ch(sm),
 		ErrorLog:     l,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
