@@ -15,7 +15,7 @@
 // swagger:meta
 package handlers
 
-import "github.com/LeeDark/go-microservices-starter/data"
+import "github.com/LeeDark/go-microservices-starter/product-api/data"
 
 //
 // NOTE: Types defined here are purely for documentation purposes

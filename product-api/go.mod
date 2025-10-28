@@ -1,4 +1,4 @@
-module github.com/LeeDark/go-microservices-starter
+module github.com/LeeDark/go-microservices-starter/product-api
 
 go 1.24.4
 

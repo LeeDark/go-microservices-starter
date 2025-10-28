@@ -3,8 +3,8 @@ package main
 import (
 	"testing"
 
-	"github.com/LeeDark/go-microservices-starter/sdk/client"
-	"github.com/LeeDark/go-microservices-starter/sdk/client/products"
+	"github.com/LeeDark/go-microservices-starter/product-api/sdk/client"
+	"github.com/LeeDark/go-microservices-starter/product-api/sdk/client/products"
 )
 
 func TestOurClient(t *testing.T) {

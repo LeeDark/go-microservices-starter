@@ -9,8 +9,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/LeeDark/go-microservices-starter/data"
-	"github.com/LeeDark/go-microservices-starter/handlers"
+	"github.com/LeeDark/go-microservices-starter/product-api/data"
+	"github.com/LeeDark/go-microservices-starter/product-api/handlers"
 	"github.com/go-openapi/runtime/middleware"
 	gohandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
