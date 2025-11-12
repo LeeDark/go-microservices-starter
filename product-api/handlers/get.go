@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 
+	currencypb "github.com/LeeDark/go-microservices-starter/currency/protos/currency"
 	"github.com/LeeDark/go-microservices-starter/product-api/data"
 )
 
@@ -60,6 +62,27 @@ func (p *Products) ListSingle(rw http.ResponseWriter, r *http.Request) {
 		data.ToJSON(&GenericError{Message: err.Error()}, rw)
 		return
 	}
+
+	// get exchange rate
+	req := &currencypb.RateRequest{
+		Base:        currencypb.Currencies(currencypb.Currencies_value["EUR"]),
+		Destination: currencypb.Currencies(currencypb.Currencies_value["GBP"]),
+	}
+
+	// execute gRPC call
+	resp, err := p.cc.GetRate(context.Background(), req)
+	if err != nil {
+		p.l.Println("[ERROR] calling currency service", err)
+
+		rw.WriteHeader(http.StatusInternalServerError)
+		data.ToJSON(&GenericError{Message: "error calling currency service"}, rw)
+		return
+	}
+
+	p.l.Println("[DEBUG] exchange rate response", resp.GetRate())
+
+	// EUR to GBP conversion
+	prod.Price = prod.Price * resp.GetRate()
 
 	err = data.ToJSON(prod, rw)
 	if err != nil {

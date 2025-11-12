@@ -9,19 +9,34 @@ import (
 	"syscall"
 	"time"
 
+	currencypb "github.com/LeeDark/go-microservices-starter/currency/protos/currency"
 	"github.com/LeeDark/go-microservices-starter/product-api/data"
 	"github.com/LeeDark/go-microservices-starter/product-api/handlers"
 	"github.com/go-openapi/runtime/middleware"
 	gohandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
 	l := log.New(os.Stdout, "products-api ", log.LstdFlags)
 	v := data.NewValidation()
 
+	// create client
+	currencyConn, err := grpc.NewClient(
+		"localhost:9092",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		l.Fatalf("did not connect to currency service: %v", err)
+	}
+	defer currencyConn.Close()
+
+	cc := currencypb.NewCurrencyClient(currencyConn)
+
 	// create the handlers
-	ph := handlers.NewProducts(l, v)
+	ph := handlers.NewProducts(l, v, cc)
 
 	// create a new serve mux and register the handlers
 	sm := mux.NewRouter()
