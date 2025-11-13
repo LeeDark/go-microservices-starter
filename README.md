@@ -53,6 +53,7 @@ In this episode I show you how to build the simplest service you can using the s
 
 In this episode we learn more about the standard library and look at how we can refactor last episodes example into a reusable microservice pattern.
 
+
 ## Learning path: Day 2
 
 ### Episode 3 - RESTFul microservices
@@ -70,6 +71,7 @@ In this episode we start to learn about RESTFul services and reading and writing
 #### Branch [episode_4](https://github.com/nicholasjackson/building-microservices-youtube/tree/episode_4)
 
 We continue to look at how you can implement RESTFul services with the Standard API
+
 
 ## Learning path: Day 3
 
@@ -90,17 +92,128 @@ In this epsode we refactor our Standard library RESTful service and start to imp
 In this episode we will look at the Go Validator package and how it can be used to validate JSON.
 
 
-## Episode 7 - Documenting APIs with Swagger
+## Learning path: Day 4
 
-### [https://youtu.be/07XhTqE-j8k](https://youtu.be/07XhTqE-j8k)
+### Episode 7 - Documenting APIs with Swagger
 
-### Branch [episode_7](https://github.com/nicholasjackson/building-microservices-youtube/tree/episode_7)
+#### [https://youtu.be/07XhTqE-j8k](https://youtu.be/07XhTqE-j8k)
+
+#### Branch [episode_7](https://github.com/nicholasjackson/building-microservices-youtube/tree/episode_7)
 
 This epsiode shows you how you can document the API we have been building over the last couple of weeks. As a bonus we will also look at how we can embed ReDoc to build a nice documentation API direct into our service.
 
-### Notes
+#### Notes
 - no DeleteProduct video
 - Yes: GetAll/Delete Swagger doc
 - No: Post/Put Swagger doc
 - No: GetSingle Swagger doc
 - No: OpenAPI 3
+
+### Episode 8 - Auto-generating HTTP client code from Swagger documentation
+
+#### [https://youtu.be/Zn4joNjqBFc](https://youtu.be/Zn4joNjqBFc)
+
+#### Branch [episode_8](https://github.com/nicholasjackson/building-microservices-youtube/tree/episode_8)
+
+In this episode we look at how we can use the Swagger API documentation we created in the last episode and generate a Go client SDK. As it turns out I had a little bug in my code
+hope you all find the process of debugging this and finding root cause useful too.
+
+
+## Learning path: Day 5
+
+### Episode 9 - CORS (Cross-Origin Resource Sharing)
+
+#### [https://youtu.be/RlYoy_RiYPw](https://youtu.be/RlYoy_RiYPw)
+
+#### Branch [episode_9](https://github.com/nicholasjackson/building-microservices-youtube/tree/episode_9)
+
+In this episode we are going to take a look at CORS (Cross-Origin Resource Sharing). CORS is a security feature built into web browsers which restricts upstream requests to sites on different domains. We look at a typical example of a React website on one domain calling a back end API, see the impact of CORS and how to solve it.
+
+
+### Episode 10 - Serving and uploading files
+
+#### [https://youtu.be/ctmhYJpGsgU](https://youtu.be/ctmhYJpGsgU)
+
+#### Branch [episode_10](https://github.com/nicholasjackson/building-microservices-youtube/tree/episode_10)
+
+In this episode you will learn how to upload and serve files using the Go standard library.
+
+
+## Learning path: Day 6
+
+### Episode 11 - Handling multi-part form uploads
+
+#### [https://youtu.be/_7-IhHMptNo](https://youtu.be/_7-IhHMptNo)
+
+#### Branch [episode_11](https://github.com/nicholasjackson/building-microservices-youtube/tree/episode_11)
+
+In this episode you will learn how to handle multi-part form uploads. Mult-part forms used to be common place as they are the basic way that browsers would upload data to a server. This pattern has fallen out of fashion as most moder data transfer to the server is done using XHR requests. There might still be a case when you need to know this though.
+
+
+### Episode 12 - Using Gzip compression for HTTP responses
+
+#### [https://youtu.be/GtSg1H7SU5Y](https://youtu.be/GtSg1H7SU5Y)
+
+#### Branch [episode_12](https://github.com/nicholasjackson/building-microservices-youtube/tree/episode_12)
+
+In this episode we walk through how to wrap a http.ResponseWriter to enable Gzip compression for HTTP responses.
+
+HTTP Headers Accept-Encoding:
+https://developer.mozilla.org/en-US/d...
+
+HTTP ResponseWriter:
+https://golang.org/pkg/net/http/#Resp...
+
+
+## Learning path: Day 7
+
+### Episode 13 - Introduction to gRPC and Protocol Buffers
+
+gRPC is a high performance framework for client server applications. It is designed to be cross platform and is an awesome alternative to RESTful services.
+
+In this episode we take a quick look at gRPC and Protocol Buffers, and how you can use them to build a simple API. This is the first video in a series of content where we dig into gRPC services.
+
+gRPC Framework:
+https://grpc.io/
+
+Protocol Buffers v3 Language Guide:
+https://developers.google.com/protocol-buffers/docs/proto3
+
+Protocol Buffers v3 Encoding format:
+https://developers.google.com/protocol-buffers/docs/encoding
+
+#### [https://youtu.be/pMgty_RYIOc](https://youtu.be/pMgty_RYIOc)
+
+
+#### Branch [episode_13](https://github.com/nicholasjackson/building-microservices-youtube/tree/episode_13)
+
+
+### Episode 14 - gRPC Client Connections
+
+In this episode we take a quick look at how you can connect to gRPC services in Go.
+
+Protocol Buffers Enum Specification:
+https://developers.google.com/protocol-buffers/docs/reference/proto3-spec#enum_definition
+
+gRPC Creating gRPC Clients:
+https://grpc.io/docs/tutorials/basic/go/#client
+
+#### [https://youtu.be/oTBcd5J0VYU](https://youtu.be/oTBcd5J0VYU)
+
+#### Branch [episode_14](https://github.com/nicholasjackson/building-microservices-youtube/tree/episode_14)
+
+
+## Learning path: Day 8
+
+### Episode 15 - Refactoring Part 1/3
+
+This video is part 1 of 3 where we start to clean up the code base a little before continuing to develop our gRPC service. Refactoring is a natural part of software development, it is difficult to get things right first time all the time. Rather than spend too much time on the perfect solution I like to go with the flow and clean up at a later date.
+
+As part of our refactoring we look at the encoding/xml and how it is very similar in use to encoding/json.
+
+Encoding/XML:
+https://golang.org/pkg/encoding/xml/
+
+#### [https://youtu.be/Vl88R9acq-Y](https://youtu.be/Vl88R9acq-Y)
+
+#### Branch [episode_15_1](https://github.com/nicholasjackson/building-microservices-youtube/tree/episode_15_1)
