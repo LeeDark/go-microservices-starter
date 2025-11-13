@@ -1,30 +1,19 @@
-Day 1
+# Product API
 
-Episode 1 - Introduction to microservices
-- VSCode
-- net/http, ListenAndServe, HandleFunc, ...
-
-Episode 2 - Introduction to microservices, continued
-
-Day 2
-
-Episode 3 - RESTful services
-
-Episode 4 - More RESTful services
-
-Day 3
-
-Episode 5 - Gorilla framework for RESTful APIs
-
-Episode 6 - JSON Validation
-
-Episode 7 - Documenting RESTful APIs with Swagger
-- Issue: no DeleteProduct video
-- Yes: GetAll/Delete Swagger doc
-- No: Post/Put Swagger doc
-- No: GetSingle Swagger doc
-- No: OpenAPI 3
-
-Day 4
+Go based Product API built using the Gorilla Toolkit [https://www.gorillatoolkit.org/](https://www.gorillatoolkit.org/)
 
 
+## Documentation
+
+OpenAPI documentation can be found in the [swagger.yaml](./swagger.yaml) file
+
+## Running
+
+The applicaiton can be run with `go run`
+
+```
+➜ go run main.go
+products-api 2020/02/16 16:15:11 Starting server on port 9091
+
+curl localhost:9091/products
+```
