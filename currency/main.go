@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 
+	"github.com/LeeDark/go-microservices-starter/currency/data"
 	currencypb "github.com/LeeDark/go-microservices-starter/currency/protos/currency"
 	"github.com/LeeDark/go-microservices-starter/currency/server"
 	"github.com/hashicorp/go-hclog"
@@ -24,8 +25,14 @@ func (w *currencyServerWrapper) GetRate(ctx context.Context, req *currencypb.Rat
 func main() {
 	log := hclog.Default()
 
+	rates, err := data.NewRates(log)
+	if err != nil {
+		log.Error("failed to load exchange rates", "error", err)
+		os.Exit(1)
+	}
+
 	gs := grpc.NewServer()
-	cs := server.NewCurrency(log)
+	cs := server.NewCurrency(log, rates)
 
 	// wrap server.Currency so it satisfies the generated interface that
 	// requires embedding UnimplementedCurrencyServer

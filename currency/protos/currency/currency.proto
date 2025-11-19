@@ -22,7 +22,7 @@ message RateRequest {
 // two currencies specified in the request
 message RateResponse {
   // Rate is the exchange rate between the two currencies
-  float Rate = 1;
+  double Rate = 1;
 }
 
 // Currencies is an enum which represents the allowed currencies fot the API

@@ -222,7 +222,7 @@ func (x *RateRequest) GetDestination() Currencies {
 type RateResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Rate is the exchange rate between the two currencies
-	Rate          float32 `protobuf:"fixed32,1,opt,name=Rate,proto3" json:"Rate,omitempty"`
+	Rate          float64 `protobuf:"fixed64,1,opt,name=Rate,proto3" json:"Rate,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -257,7 +257,7 @@ func (*RateResponse) Descriptor() ([]byte, []int) {
 	return file_currency_currency_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *RateResponse) GetRate() float32 {
+func (x *RateResponse) GetRate() float64 {
 	if x != nil {
 		return x.Rate
 	}
@@ -273,7 +273,7 @@ const file_currency_currency_proto_rawDesc = "" +
 	"\x04Base\x18\x01 \x01(\x0e2\x14.currency.CurrenciesR\x04Base\x126\n" +
 	"\vDestination\x18\x02 \x01(\x0e2\x14.currency.CurrenciesR\vDestination\"\"\n" +
 	"\fRateResponse\x12\x12\n" +
-	"\x04Rate\x18\x01 \x01(\x02R\x04Rate*\xb5\x02\n" +
+	"\x04Rate\x18\x01 \x01(\x01R\x04Rate*\xb5\x02\n" +
 	"\n" +
 	"Currencies\x12\a\n" +
 	"\x03EUR\x10\x00\x12\a\n" +
