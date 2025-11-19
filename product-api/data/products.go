@@ -1,7 +1,11 @@
 package data
 
 import (
+	"context"
 	"fmt"
+
+	currencypb "github.com/LeeDark/go-microservices-starter/currency/protos/currency"
+	"github.com/hashicorp/go-hclog"
 )
 
 // ErrProductNotFound is an error raised when a product can not be found in the database
@@ -32,7 +36,7 @@ type Product struct {
 	//
 	// required: true
 	// min: 0.01
-	Price float32 `json:"price" validate:"required,gt=0"`
+	Price float64 `json:"price" validate:"required,gt=0"`
 
 	// the SKU for the product
 	//
@@ -44,29 +48,71 @@ type Product struct {
 // Products defines a slice of Product
 type Products []*Product
 
+type ProductsDB struct {
+	log      hclog.Logger
+	currency currencypb.CurrencyClient
+}
+
+func NewProductsDB(l hclog.Logger, c currencypb.CurrencyClient) *ProductsDB {
+	return &ProductsDB{log: l, currency: c}
+}
+
 // GetProducts returns all products from the database
-func GetProducts() Products {
-	return productList
+func (db *ProductsDB) GetProducts(currency string) (Products, error) {
+	if currency == "" {
+		return productList, nil
+	}
+
+	// get exchange rate
+	rate, err := db.getRate(currency)
+	if err != nil {
+		return nil, err
+	}
+
+	// productListReturn := make(Products, len(productList))
+	// copy(productListReturn, productList)
+
+	productListReturn := Products{}
+	for _, prod := range productList {
+		np := *prod
+		np.Price = np.Price * rate
+		productListReturn = append(productListReturn, &np)
+	}
+
+	return productListReturn, nil
 }
 
 // GetProductByID returns a single product which matches the id from the
 // database.
 // If a product is not found this function returns a ProductNotFound error
-func GetProductByID(id int) (*Product, error) {
-	i := findIndexByProductID(id)
+func (db *ProductsDB) GetProductByID(id int, currency string) (*Product, error) {
+	i := db.findIndexByProductID(id)
 	if id == -1 {
 		return nil, ErrProductNotFound
 	}
 
-	return productList[i], nil
+	if currency == "" {
+		return productList[i], nil
+	}
+
+	rate, err := db.getRate(currency)
+	if err != nil {
+		db.log.Error("Unable to get rate", "currency", currency, "error", err)
+		return nil, err
+	}
+
+	np := *productList[i]
+	np.Price = np.Price * rate
+
+	return &np, nil
 }
 
 // UpdateProduct replaces a product in the database with the given
 // item.
 // If a product with the given id does not exist in the database
 // this function returns a ProductNotFound error
-func UpdateProduct(p Product) error {
-	i := findIndexByProductID(p.ID)
+func (db *ProductsDB) UpdateProduct(p Product) error {
+	i := db.findIndexByProductID(p.ID)
 	if i == -1 {
 		return ErrProductNotFound
 	}
@@ -78,7 +124,7 @@ func UpdateProduct(p Product) error {
 }
 
 // AddProduct adds a new product to the database
-func AddProduct(p Product) {
+func (db *ProductsDB) AddProduct(p Product) {
 	// get the next id in sequence
 	maxID := productList[len(productList)-1].ID
 	p.ID = maxID + 1
@@ -86,8 +132,8 @@ func AddProduct(p Product) {
 }
 
 // DeleteProduct deletes a product from the database
-func DeleteProduct(id int) error {
-	i := findIndexByProductID(id)
+func (db *ProductsDB) DeleteProduct(id int) error {
+	i := db.findIndexByProductID(id)
 	if i == -1 {
 		return ErrProductNotFound
 	}
@@ -99,7 +145,7 @@ func DeleteProduct(id int) error {
 
 // findIndex finds the index of a product in the database
 // returns -1 when no product can be found
-func findIndexByProductID(id int) int {
+func (db *ProductsDB) findIndexByProductID(id int) int {
 	for i, p := range productList {
 		if p.ID == id {
 			return i
@@ -108,6 +154,25 @@ func findIndexByProductID(id int) int {
 
 	return -1
 }
+
+func (db *ProductsDB) getRate(destination string) (float64, error) {
+	req := &currencypb.RateRequest{
+		Base:        currencypb.Currencies(currencypb.Currencies_value["EUR"]),
+		Destination: currencypb.Currencies(currencypb.Currencies_value[destination]),
+	}
+
+	// execute gRPC call
+	resp, err := db.currency.GetRate(context.Background(), req)
+	if err != nil {
+		db.log.Error("[ERROR] calling currency service", err)
+		return 0, err
+	}
+
+	return resp.GetRate(), nil
+}
+
+// productList is a hard coded list of products for this
+// example data source
 
 var productList = []*Product{
 	&Product{

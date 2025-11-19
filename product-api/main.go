@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,12 +14,24 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	gohandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/hashicorp/go-hclog"
+	"github.com/nicholasjackson/env"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+var bindAddress = env.String("BIND_ADDRESS", false, ":9090", "Bind address for the server")
+var logLevel = env.String("LOG_LEVEL", false, "debug", "Log output level for the server [debug, info, trace]")
+
 func main() {
-	l := log.New(os.Stdout, "products-api ", log.LstdFlags)
+	env.Parse()
+
+	l := hclog.New(
+		&hclog.LoggerOptions{
+			Name:  "product-images",
+			Level: hclog.LevelFromString(*logLevel),
+		},
+	)
 	v := data.NewValidation()
 
 	// create client
@@ -29,14 +40,17 @@ func main() {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		l.Fatalf("did not connect to currency service: %v", err)
+		l.Error("did not connect to currency service: %v", err)
 	}
 	defer currencyConn.Close()
 
 	cc := currencypb.NewCurrencyClient(currencyConn)
 
+	// create databse instance
+	productsDB := data.NewProductsDB(l, cc)
+
 	// create the handlers
-	ph := handlers.NewProducts(l, v, cc)
+	ph := handlers.NewProducts(l, v, productsDB)
 
 	// create a new serve mux and register the handlers
 	sm := mux.NewRouter()
@@ -44,7 +58,9 @@ func main() {
 	// handlers for API
 	getR := sm.Methods(http.MethodGet).Subrouter()
 	getR.HandleFunc("/products", ph.ListAll)
+	getR.HandleFunc("/products", ph.ListAll).Queries("currency", "{[A-Z]{3}}")
 	getR.HandleFunc("/products/{id:[0-9]+}", ph.ListSingle)
+	getR.HandleFunc("/products/{id:[0-9]+}", ph.ListSingle).Queries("currency", "{[A-Z]{3}}")
 
 	putR := sm.Methods(http.MethodPut).Subrouter()
 	putR.HandleFunc("/products", ph.Update)
@@ -65,13 +81,15 @@ func main() {
 	getR.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
 
 	// CORS
-	ch := gohandlers.CORS(gohandlers.AllowedOrigins([]string{"http://localhost:3001"}), gohandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"}))
+	ch := gohandlers.CORS(
+		gohandlers.AllowedOrigins([]string{"http://localhost:3001"}),
+		gohandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"}))
 
 	// create a new server
 	s := &http.Server{
-		Addr:         ":9090",
+		Addr:         *bindAddress,
 		Handler:      ch(sm),
-		ErrorLog:     l,
+		ErrorLog:     l.StandardLogger(&hclog.StandardLoggerOptions{}),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  120 * time.Second,
@@ -79,11 +97,11 @@ func main() {
 
 	// start the server
 	go func() {
-		l.Println("Starting server on port 9090")
+		l.Info("Starting server", "port", *bindAddress)
 
 		err := s.ListenAndServe()
 		if err != nil {
-			l.Printf("Error starting server: %s\n", err)
+			l.Error("Error starting server", "error", err)
 			os.Exit(1)
 		}
 	}()
@@ -95,7 +113,7 @@ func main() {
 
 	// block until a signal is received
 	sig := <-c
-	l.Println("Received terminate, graceful shutdown", sig)
+	l.Info("Received terminate, graceful shutdown", "signal", sig)
 
 	// gracefully shutdown the server, waiting max 30 seconds for current operations to complete
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(30*time.Second))
