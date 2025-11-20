@@ -11,12 +11,46 @@ import (
 )
 
 type Currency struct {
-	log   hclog.Logger
-	rates *data.ExchangeRates
+	log           hclog.Logger
+	rates         *data.ExchangeRates
+	subscriptions map[currencypb.Currency_SubscribeRatesServer][]*currencypb.RateRequest
 }
 
 func NewCurrency(l hclog.Logger, rates *data.ExchangeRates) *Currency {
-	return &Currency{log: l, rates: rates}
+	c := &Currency{
+		log:           l,
+		rates:         rates,
+		subscriptions: make(map[currencypb.Currency_SubscribeRatesServer][]*currencypb.RateRequest),
+	}
+
+	go c.handleUpdates()
+
+	return c
+}
+
+func (c *Currency) handleUpdates() {
+	ru := c.rates.MonitorRates(5 * time.Second)
+	for range ru {
+		c.log.Info("Got updated rates")
+
+		// loop over subscrived clients
+		for k, v := range c.subscriptions {
+
+			// loop over subscribed rates
+			for _, rr := range v {
+				rate, err := c.rates.GetRate(rr.GetBase().String(), rr.GetDestination().String())
+				if err != nil {
+					c.log.Error("Unable to get updated rate", "base", rr.GetBase().String(), "destination", rr.GetDestination().String(), "error", err)
+					continue
+				}
+
+				err = k.Send(&currencypb.RateResponse{Base: rr.Base, Destination: rr.Destination, Rate: rate})
+				if err != nil {
+					c.log.Error("Unable to send updated rate to client", "error", err)
+				}
+			}
+		}
+	}
 }
 
 func (c *Currency) GetRate(ctx context.Context, req *currencypb.RateRequest) (*currencypb.RateResponse, error) {
@@ -31,37 +65,38 @@ func (c *Currency) GetRate(ctx context.Context, req *currencypb.RateRequest) (*c
 	}
 
 	return &currencypb.RateResponse{
-		Rate: rate,
+		Base:        req.GetBase(),
+		Destination: req.GetDestination(),
+		Rate:        rate,
 	}, nil
 }
 
 func (c *Currency) SubscribeRates(stream currencypb.Currency_SubscribeRatesServer) error {
-
-	go func() {
-		for {
-			rr, err := stream.Recv()
-			if err == io.EOF {
-				c.log.Info("Client closed the stream")
-				break
-			}
-
-			if err != nil {
-				c.log.Error("Unable to read from client", "error", err)
-				break
-			}
-
-			c.log.Info("SubscribeRates called", "base", rr.GetBase(), "destination", rr.GetDestination())
-		}
-	}()
-
-	// For demo purposes, send a rate every 5 seconds
 	for {
-		err := stream.Send(&currencypb.RateResponse{Rate: 12.1})
+		// Recv is a blocking method which returns on client data
+		rr, err := stream.Recv()
+		// io.EOF signals that the client has cloased the connection
+		if err == io.EOF {
+			c.log.Info("Client closed the stream")
+			break
+		}
+
+		// any other error means the transport between the server and client is unavaliable
 		if err != nil {
-			c.log.Error("Unable to send to client", "error", err)
+			c.log.Error("Unable to read from client", "error", err)
 			return err
 		}
 
-		time.Sleep(5 * time.Second)
+		c.log.Info("SubscribeRates called", "base", rr.GetBase(), "destination", rr.GetDestination())
+
+		rrs, ok := c.subscriptions[stream]
+		if !ok {
+			rrs = []*currencypb.RateRequest{}
+		}
+
+		rrs = append(rrs, rr)
+		c.subscriptions[stream] = rrs
 	}
+
+	return nil
 }
