@@ -2,6 +2,8 @@ package server
 
 import (
 	"context"
+	"io"
+	"time"
 
 	"github.com/LeeDark/go-microservices-starter/currency/data"
 	currencypb "github.com/LeeDark/go-microservices-starter/currency/protos/currency"
@@ -31,4 +33,35 @@ func (c *Currency) GetRate(ctx context.Context, req *currencypb.RateRequest) (*c
 	return &currencypb.RateResponse{
 		Rate: rate,
 	}, nil
+}
+
+func (c *Currency) SubscribeRates(stream currencypb.Currency_SubscribeRatesServer) error {
+
+	go func() {
+		for {
+			rr, err := stream.Recv()
+			if err == io.EOF {
+				c.log.Info("Client closed the stream")
+				break
+			}
+
+			if err != nil {
+				c.log.Error("Unable to read from client", "error", err)
+				break
+			}
+
+			c.log.Info("SubscribeRates called", "base", rr.GetBase(), "destination", rr.GetDestination())
+		}
+	}()
+
+	// For demo purposes, send a rate every 5 seconds
+	for {
+		err := stream.Send(&currencypb.RateResponse{Rate: 12.1})
+		if err != nil {
+			c.log.Error("Unable to send to client", "error", err)
+			return err
+		}
+
+		time.Sleep(5 * time.Second)
+	}
 }
