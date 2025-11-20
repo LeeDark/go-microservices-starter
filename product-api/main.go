@@ -28,7 +28,7 @@ func main() {
 
 	l := hclog.New(
 		&hclog.LoggerOptions{
-			Name:  "product-images",
+			Name:  "product-api",
 			Level: hclog.LevelFromString(*logLevel),
 		},
 	)

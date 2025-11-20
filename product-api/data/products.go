@@ -51,10 +51,42 @@ type Products []*Product
 type ProductsDB struct {
 	log      hclog.Logger
 	currency currencypb.CurrencyClient
+	rates    map[string]float64
+	client   currencypb.Currency_SubscribeRatesClient
 }
 
 func NewProductsDB(l hclog.Logger, c currencypb.CurrencyClient) *ProductsDB {
-	return &ProductsDB{log: l, currency: c}
+	db := &ProductsDB{
+		log:      l,
+		currency: c,
+		rates:    make(map[string]float64),
+		client:   nil,
+	}
+
+	go db.handleUpdates()
+
+	return db
+}
+
+func (db *ProductsDB) handleUpdates() {
+	sub, err := db.currency.SubscribeRates(context.Background())
+	if err != nil {
+		db.log.Error("Unable to subscribe for rates", "error", err)
+		return
+	}
+
+	db.client = sub
+
+	for {
+		rr, err := sub.Recv()
+		if err != nil {
+			db.log.Error("Error receiving message", "error", err)
+			continue
+		}
+
+		db.log.Info("Received updated rate", "base", rr.GetBase(), "destination", rr.GetDestination(), "rate", rr.GetRate())
+		db.rates[rr.GetDestination().String()] = rr.GetRate()
+	}
 }
 
 // GetProducts returns all products from the database
@@ -156,6 +188,10 @@ func (db *ProductsDB) findIndexByProductID(id int) int {
 }
 
 func (db *ProductsDB) getRate(destination string) (float64, error) {
+	if r, ok := db.rates[destination]; ok {
+		return r, nil
+	}
+
 	req := &currencypb.RateRequest{
 		Base:        currencypb.Currencies(currencypb.Currencies_value["EUR"]),
 		Destination: currencypb.Currencies(currencypb.Currencies_value[destination]),
@@ -166,6 +202,14 @@ func (db *ProductsDB) getRate(destination string) (float64, error) {
 	if err != nil {
 		db.log.Error("[ERROR] calling currency service", err)
 		return 0, err
+	}
+
+	db.rates[destination] = resp.Rate
+
+	// subscribe for updates
+	err = db.client.Send(req)
+	if err != nil {
+		db.log.Error("Unable to send rate request for updates", "error", err)
 	}
 
 	return resp.GetRate(), nil
