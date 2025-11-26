@@ -1,6 +1,6 @@
 module github.com/LeeDark/go-microservices-starter/tutorials/building-microservices-youtube/product-images
 
-go 1.24.4
+go 1.25.4
 
 require (
 	github.com/gorilla/mux v1.8.1

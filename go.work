@@ -1,0 +1,7 @@
+go 1.25.4
+
+use (
+	./tutorials/building-microservices-youtube/currency
+	./tutorials/building-microservices-youtube/product-api
+	./tutorials/building-microservices-youtube/product-images
+)
