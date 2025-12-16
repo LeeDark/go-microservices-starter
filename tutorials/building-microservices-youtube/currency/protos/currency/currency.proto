@@ -2,12 +2,14 @@ syntax = "proto3";
 
 package currency;
 
+import "google/rpc/status.proto";
+
 option go_package = "github.com/LeeDark/go-microservices-starter/tutorials/building-microservices-youtube/currency/protos/currency;currencypb";
 
 service Currency {
   // GetRate returns the exchange rate for the two provided currency codes
   rpc GetRate(RateRequest) returns (RateResponse);
-  rpc SubscribeRates(stream RateRequest) returns (stream RateResponse);
+  rpc SubscribeRates(stream RateRequest) returns (stream StreamingRateResponse);
 }
 
 // RateRequest defines the request for a GetRate call
@@ -28,6 +30,17 @@ message RateResponse {
   Currencies Destination = 2;
   // Rate is the exchange rate between the two currencies
   double Rate = 3;
+}
+
+message StreamingRateResponse {
+  oneof message {
+    RateResponse rate_response = 1;
+    SubscribeError error = 2;
+  }
+}
+
+message SubscribeError {
+  google.rpc.Status error = 1;
 }
 
 // Currencies is an enum which represents the allowed currencies fot the API

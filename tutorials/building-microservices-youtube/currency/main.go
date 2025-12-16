@@ -22,7 +22,7 @@ func (w *currencyServerWrapper) GetRate(ctx context.Context, req *currencypb.Rat
 	return w.Currency.GetRate(ctx, req)
 }
 
-func (w *currencyServerWrapper) SubscribeRates(stream grpc.BidiStreamingServer[currencypb.RateRequest, currencypb.RateResponse]) error {
+func (w *currencyServerWrapper) SubscribeRates(stream grpc.BidiStreamingServer[currencypb.RateRequest, currencypb.StreamingRateResponse]) error {
 	return w.Currency.SubscribeRates(stream)
 }
 

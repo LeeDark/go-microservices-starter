@@ -46,7 +46,14 @@ func (c *Currency) handleUpdates() {
 					continue
 				}
 
-				err = k.Send(&currencypb.RateResponse{Base: rr.Base, Destination: rr.Destination, Rate: rate})
+				err = k.Send(
+					&currencypb.StreamingRateResponse{
+						Message: &currencypb.StreamingRateResponse_RateResponse{
+							RateResponse: &currencypb.RateResponse{
+								Base: rr.Base, Destination: rr.Destination, Rate: rate,
+							},
+						},
+					})
 				if err != nil {
 					c.log.Error("Unable to send updated rate to client", "error", err)
 				}
@@ -116,6 +123,38 @@ func (c *Currency) SubscribeRates(stream currencypb.Currency_SubscribeRatesServe
 		rrs, ok := c.subscriptions[stream]
 		if !ok {
 			rrs = []*currencypb.RateRequest{}
+		}
+
+		// check that subscription does not exist
+		var grpcError *status.Status
+		for _, v := range rrs {
+			if v.Base == rr.Base && v.Destination == rr.Destination {
+				// already subscribed
+				c.log.Error("Subscription already active", "base", rr.GetBase().String(), "destination", rr.GetDestination().String())
+
+				grpcError = status.New(codes.InvalidArgument, "Subscription already exists for rate")
+
+				grpcError, err = grpcError.WithDetails(rr)
+				if err != nil {
+					c.log.Error("Unable to add metadata to error message", "error", err)
+					break
+				}
+
+				break
+			}
+		}
+
+		// if gRPC error return error and continue
+		if grpcError != nil {
+			stream.Send(&currencypb.StreamingRateResponse{
+				Message: &currencypb.StreamingRateResponse_Error{
+					Error: &currencypb.SubscribeError{
+						Error: grpcError.Proto(),
+					},
+				},
+			})
+
+			continue
 		}
 
 		rrs = append(rrs, rr)

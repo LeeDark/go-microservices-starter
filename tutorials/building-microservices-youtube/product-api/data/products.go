@@ -57,6 +57,9 @@ type ProductsDB struct {
 	client   currencypb.Currency_SubscribeRatesClient
 }
 
+// NewProductsDB returns a Data object for CRUD operations on Products data.
+// This type also handles conversion of currencies through integraiton with the
+// currency service.
 func NewProductsDB(l hclog.Logger, c currencypb.CurrencyClient) *ProductsDB {
 	db := &ProductsDB{
 		log:      l,
@@ -80,14 +83,41 @@ func (db *ProductsDB) handleUpdates() {
 	db.client = sub
 
 	for {
-		rr, err := sub.Recv()
+		// Recv returns a StreamingRateResponse which can contain one of two messages RateResponse or an Error.
+		// We need to handle each case separately
+		srr, err := sub.Recv()
+
+		// handle connection errors
+		// this is normally terminal requires a reconnect
 		if err != nil {
-			db.log.Error("Error receiving message", "error", err)
-			continue
+			db.log.Error("Error while waiting for message", "error", err)
+			return
 		}
 
-		db.log.Info("Received updated rate", "base", rr.GetBase(), "destination", rr.GetDestination(), "rate", rr.GetRate())
-		db.rates[rr.GetDestination().String()] = rr.GetRate()
+		// handle a returned error message
+		if grpcError := srr.GetError(); grpcError != nil {
+			db.log.Error("Error subscribing for rates", "error", grpcError)
+			sre := status.FromProto(grpcError.Error)
+
+			if sre.Code() == codes.InvalidArgument {
+				errDetails := ""
+				// get the RateRequest serialized in the error response
+				// Details is a collection but we are only returning a single item
+				if d := sre.Details(); len(d) > 0 {
+					db.log.Error("Details", "d", d)
+					if rr, ok := d[0].(*currencypb.RateRequest); ok {
+						errDetails = fmt.Sprintf("base: %s destination: %s", rr.GetBase().String(), rr.GetDestination().String())
+					}
+				}
+
+				db.log.Error("Received error from currency service rate subscription", "error", grpcError.Error.Message, "details", errDetails)
+			}
+		}
+
+		if rr := srr.GetRateResponse(); rr != nil {
+			db.log.Info("Received updated rate from server", "base", rr.GetBase(), "destination", rr.GetDestination(), "rate", rr.GetRate())
+			db.rates[rr.GetDestination().String()] = rr.GetRate()
+		}
 	}
 }
 
@@ -190,9 +220,9 @@ func (db *ProductsDB) findIndexByProductID(id int) int {
 }
 
 func (db *ProductsDB) getRate(destination string) (float64, error) {
-	if r, ok := db.rates[destination]; ok {
-		return r, nil
-	}
+	// if r, ok := db.rates[destination]; ok {
+	// 	return r, nil
+	// }
 
 	req := &currencypb.RateRequest{
 		Base:        currencypb.Currencies(currencypb.Currencies_value["EUR"]),
@@ -222,6 +252,7 @@ func (db *ProductsDB) getRate(destination string) (float64, error) {
 	err = db.client.Send(req)
 	if err != nil {
 		db.log.Error("Unable to send rate request for updates", "error", err)
+		return -1, err
 	}
 
 	return resp.GetRate(), nil
