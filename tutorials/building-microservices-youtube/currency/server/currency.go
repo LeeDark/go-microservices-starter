@@ -8,6 +8,8 @@ import (
 	"github.com/LeeDark/go-microservices-starter/tutorials/building-microservices-youtube/currency/data"
 	currencypb "github.com/LeeDark/go-microservices-starter/tutorials/building-microservices-youtube/currency/protos/currency"
 	"github.com/hashicorp/go-hclog"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type Currency struct {
@@ -55,6 +57,28 @@ func (c *Currency) handleUpdates() {
 
 func (c *Currency) GetRate(ctx context.Context, req *currencypb.RateRequest) (*currencypb.RateResponse, error) {
 	c.log.Info("GetRate called", "base", req.GetBase(), "destination", req.GetDestination())
+
+	if req.Base == req.Destination {
+		// err := status.Errorf(
+		// 	codes.InvalidArgument,
+		// 	"Base currency %s can not be the same as the destination currency %s",
+		// 	req.Base.String(), req.Destination.String(),
+		// )
+
+		err := status.Newf(
+			codes.InvalidArgument,
+			"Base currency %s can not be the same as the destination currency %s",
+			req.Base.String(), req.Destination.String(),
+		)
+
+		err, wde := err.WithDetails(req)
+		if wde != nil {
+			return nil, wde
+		}
+
+		// return nil, fmt.Errorf("base can not be the same as the destination")
+		return nil, err.Err()
+	}
 
 	// For demo purposes, return a static rate
 	// rate := float32(1.23)

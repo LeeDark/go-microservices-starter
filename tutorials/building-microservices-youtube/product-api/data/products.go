@@ -6,6 +6,8 @@ import (
 
 	currencypb "github.com/LeeDark/go-microservices-starter/tutorials/building-microservices-youtube/currency/protos/currency"
 	"github.com/hashicorp/go-hclog"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // ErrProductNotFound is an error raised when a product can not be found in the database
@@ -201,7 +203,17 @@ func (db *ProductsDB) getRate(destination string) (float64, error) {
 	resp, err := db.currency.GetRate(context.Background(), req)
 	if err != nil {
 		db.log.Error("[ERROR] calling currency service", err)
-		return 0, err
+		if s, ok := status.FromError(err); ok {
+			if s.Code() == codes.InvalidArgument {
+				// md := s.Details()[0].(*currencypb.RateRequest)
+				// return -1, fmt.Errorf("unable to get rate from currency server, base: %s, dest: %s", md.Base.String(), md.Destination.String())
+				return -1, fmt.Errorf("unable to get rate from currency server: %s", s.Message())
+			}
+
+			return -1, fmt.Errorf("error calling currency server: %v", s.Message())
+		}
+
+		return -1, err
 	}
 
 	db.rates[destination] = resp.Rate
