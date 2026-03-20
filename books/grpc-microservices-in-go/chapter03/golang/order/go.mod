@@ -1,4 +1,4 @@
-module github.com/LeeDark/go-microservices-starter/books/grpc-microservices-in-go/chapter03
+module github.com/LeeDark/go-microservices-starter/books/grpc-microservices-in-go/chapter03/golang/order
 
 go 1.25.6
 
