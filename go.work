@@ -1,6 +1,7 @@
-go 1.25.4
+go 1.25.6
 
 use (
+	./grpc-playground
 	./tutorials/building-microservices-youtube/currency
 	./tutorials/building-microservices-youtube/product-api
 	./tutorials/building-microservices-youtube/product-images
