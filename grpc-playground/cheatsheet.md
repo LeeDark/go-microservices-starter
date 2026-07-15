@@ -91,7 +91,18 @@ The `.proto` file is the service contract. Its `package` identifies Protocol
 Buffers types, while `option go_package` sets the Go import path and package
 name for generated code.
 
-From the `grpc-playground` directory, regenerate this project's code with:
+From the `grpc-playground` directory, regenerate all playground protobuf code
+with:
+
+```bash
+make protos
+```
+
+The current `protos` target runs `protos-helloworld`. When another playground
+example is added, give it a dedicated target and add that target as a dependency
+of `protos` in the top-level `Makefile`.
+
+The current target expands to:
 
 ```bash
 protoc --go_out=. --go_opt=paths=source_relative \
