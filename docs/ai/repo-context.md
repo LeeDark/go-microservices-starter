@@ -9,7 +9,7 @@ production service.
 | Path | Role |
 | --- | --- |
 | `grpc-playground/` | Primary hands-on gRPC learning project. The current example is `helloworld`. |
-| `grpc_microservices_roadmap.md` | Phased gRPC learning roadmap. |
+| `docs/learning/grpc-microservices-roadmap.md` | Phased gRPC learning roadmap. |
 | `tutorials/building-microservices-youtube/` | Code from the Building Microservices YouTube series. |
 | `books/grpc-microservices-in-go/` | Book notes and exercises. |
 

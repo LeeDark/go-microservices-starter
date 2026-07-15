@@ -37,3 +37,37 @@ entry at the end. Keep entries factual and concise.
   the current repository layout.
 - Notes: Future implementation tasks should append an entry using the format
   above.
+
+## 2026-07-15 — Upgrade Go directives to 1.26.4
+
+- Scope: Updated the Go version in every `go.mod` and in `go.work`, then ran
+  `go mod tidy` for each module and `go work sync` for the workspace.
+- Files: `go.work`, every module's `go.mod`, and the affected `go.sum` and
+  `go.work.sum` files.
+- Verification: `go test ./...` passed for `grpc-playground` and
+  `product-images`; the standalone book module passed with `GOWORK=off`.
+- Notes: The currency test needs network access to the ECB. Product API tests
+  require a local service on port 9090 and contain existing validation
+  expectations that fail under the resolved dependency graph.
+
+## 2026-07-15 — Refresh root project documentation
+
+- Scope: Replaced the stale root README with an accurate repository guide and
+  moved the gRPC learning roadmap into `docs/learning` with current Phase 1–2
+  progress.
+- Files: `README.md`, `docs/learning/grpc-microservices-roadmap.md`, and
+  `docs/ai/repo-context.md`.
+- Verification: Checked internal documentation references and ran
+  `git diff --check`.
+- Notes: Module-specific README files were reviewed but intentionally left for
+  separate, scoped updates.
+
+## 2026-07-15 — Add YouTube tutorial overview
+
+- Scope: Added a tutorial-level README with component ownership, local run
+  order, port mapping, protobuf generation, and known limitations.
+- Files: `tutorials/building-microservices-youtube/README.md` and
+  `docs/ai/task-history.md`.
+- Verification: Checked service ports, frontend endpoint configuration, and
+  internal links against the current source tree.
+- Notes: Component-specific README files remain pending individual review.

@@ -43,6 +43,17 @@ That order matters. Otherwise you end up with three services, five containers, a
 
 ---
 
+## Current progress
+
+- **Phase 1 — Core gRPC foundation:** complete. Notes are in
+  [`grpc-playground/cheatsheet.md`](../../grpc-playground/cheatsheet.md).
+- **Phase 2 — gRPC in Go:** complete. `grpc-playground` contains a unary gRPC
+  server and client, reproducible protobuf generation, and an in-memory
+  integration test.
+- **Current focus:** Phase 3 — Protocol Buffers and contract design.
+
+---
+
 ## Phase 1. Core gRPC foundation
 
 ### Goal
@@ -390,12 +401,12 @@ Study these after the main path, not before.
 # Recommended study order: Now / Next / Later
 
 ## Now
-- [ ] Introduction to gRPC
-- [ ] Core concepts
-- [ ] Go Quick Start
-- [ ] Go Basics tutorial
-- [ ] Generated-code reference
-- [ ] One unary RPC in Go
+- [x] Introduction to gRPC
+- [x] Core concepts
+- [x] Go Quick Start
+- [x] Go Basics tutorial
+- [x] Generated-code reference
+- [x] One unary RPC in Go
 - [ ] All 4 RPC types in one demo service
 
 ## Next
