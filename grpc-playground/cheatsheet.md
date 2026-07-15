@@ -67,3 +67,101 @@ multiple messages. gRPC preserves message order within each individual stream.
 5. With status `OK`, the client receives the response and the call completes.
    Either side can cancel a call; the client deadline can end it with
    `DEADLINE_EXCEEDED`. Changes made before cancellation are not rolled back.
+
+# Phase 2 — gRPC in Go
+
+## Study
+
+- [Quick start | Go](https://grpc.io/docs/languages/go/quickstart/)
+- [Basics tutorial | Go](https://grpc.io/docs/languages/go/basics/)
+- [Generated-code reference | Go](https://grpc.io/docs/languages/go/generated-code/)
+
+## Toolchain and code generation
+
+A Go gRPC project needs Go, the Protocol Buffers compiler (`protoc`), and two
+Go plugins:
+
+```bash
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+export PATH="$PATH:$(go env GOPATH)/bin"
+```
+
+The `.proto` file is the service contract. Its `package` identifies Protocol
+Buffers types, while `option go_package` sets the Go import path and package
+name for generated code.
+
+From the `grpc-playground` directory, regenerate this project's code with:
+
+```bash
+protoc --go_out=. --go_opt=paths=source_relative \
+  --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+  helloworld/helloworld/helloworld.proto
+```
+
+`paths=source_relative` keeps generated files beside their source `.proto`
+file. The command creates or updates:
+
+- `helloworld/helloworld/helloworld.pb.go`: Go types for protobuf messages and
+  their serialization support.
+- `helloworld/helloworld/helloworld_grpc.pb.go`: the generated client and
+  server APIs for the gRPC service.
+
+Do not edit generated `*.pb.go` files by hand. Change the `.proto` contract,
+then run `protoc` again.
+
+## From contract to running application
+
+The current example follows this flow:
+
+1. `helloworld.proto` declares the `Greeter` service, its unary methods
+   `SayHello` and `SayHelloAgain`, and the `HelloRequest` and `HelloReply`
+   messages.
+2. `protoc` generates Go message types, `GreeterClient`, `GreeterServer`,
+   `NewGreeterClient`, and `RegisterGreeterServer`.
+3. The human-written server implements the generated `GreeterServer` interface.
+4. The human-written client creates a generated `GreeterClient` and calls its
+   methods.
+
+For a unary method, the generated server interface has this shape:
+
+```go
+Method(context.Context, *Request) (*Response, error)
+```
+
+The generated client method has this shape:
+
+```go
+Method(ctx context.Context, request *Request, opts ...grpc.CallOption) (*Response, error)
+```
+
+## Server structure
+
+The server implementation in `helloworld/greeter_server/main.go`:
+
+1. embeds `pb.UnimplementedGreeterServer` for forward compatibility;
+2. implements the service methods;
+3. opens a TCP listener with `net.Listen`;
+4. creates a server with `grpc.NewServer()`;
+5. registers the implementation with `pb.RegisterGreeterServer`;
+6. blocks in `Serve` while it accepts and dispatches RPCs.
+
+## Client structure
+
+The client in `helloworld/greeter_client/main.go`:
+
+1. creates a connection with `grpc.NewClient` and closes it with `defer`;
+2. obtains the generated stub with `pb.NewGreeterClient(conn)`;
+3. creates a context with a one-second deadline;
+4. calls `SayHello` and `SayHelloAgain` with a `HelloRequest`;
+5. reads the returned `HelloReply` or handles the error.
+
+`insecure.NewCredentials()` is suitable for this local learning example only.
+Use transport security and appropriate credentials for a real service.
+
+## Generated streaming APIs: preview
+
+Newly generated Go streaming APIs use generics. Client RPC calls and server RPC
+handlers are safe to run in concurrent goroutines. Within one stream, however,
+do not perform concurrent reads or concurrent writes; one read and one write
+can proceed independently. Streaming implementation belongs to Phase 4.
