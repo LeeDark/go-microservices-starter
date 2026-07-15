@@ -1,6 +1,6 @@
 module github.com/LeeDark/go-microservices-starter/books/grpc-microservices-in-go/chapter03/golang/order
 
-go 1.25.6
+go 1.26.4
 
 require (
 	google.golang.org/grpc v1.79.3
