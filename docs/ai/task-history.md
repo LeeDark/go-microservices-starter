@@ -103,3 +103,13 @@ Keep entries factual and concise.
   baseline, and ran `git diff --check` successfully.
 - Notes: Documentation only; no runtime dependencies, generated code, gateway, telemetry, or CLI
   configuration was added.
+
+## 2026-08-10 — Split Phase 3 into 3A, 3B, and 3C
+
+- Scope: Reorganized Phase 3 into protobuf contract design, Buf workflow, and adjacent protobuf/gRPC
+  tooling, with explicit goals and Definition of Done.
+- Files: Both roadmap translations, both gRPC cheatsheets, and this task history.
+- Verification: Checked bilingual phase structure, learning order, tool boundaries, and ran `git
+  diff --check` successfully.
+- Notes: The primary `grpc-go + protobuf + Buf` path and `protoc`/Makefile baseline remain
+  unchanged.

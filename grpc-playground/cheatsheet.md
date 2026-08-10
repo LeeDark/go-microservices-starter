@@ -167,39 +167,16 @@ run in concurrent goroutines. Within one stream, however, do not perform concurr
 concurrent writes; one read and one write can proceed independently. Streaming implementation
 belongs to Phase 4.
 
-# Adjacent tooling tracks
+# Phase 3 map
 
-The main learning path remains `grpc-go + protobuf + Buf`. These tools extend that path without
-replacing it:
-
-- **ConnectRPC**: compare an alternative RPC runtime that is compatible with gRPC and gRPC-Web.
-- **grpc-gateway + OpenAPI**: expose the same protobuf/gRPC contract through HTTP/JSON and document
-  that surface.
-- **OpenTelemetry**: instrument RPC, gateway, and service-to-service calls with traces, metrics,
-  propagation, and OTLP.
-- **grpcurl**: inspect and manually invoke services through reflection, `.proto`, or protoset
-  descriptors.
+- **Phase 3A — Protobuf contract design:** learn `.proto`, compatibility, `v1`/`v2`, and generated
+  Go API using only `protoc` and the Makefile.
+- **Phase 3B — Buf contract workflow:** add format, lint, breaking checks, reproducible generation,
+  and dependency/version basics.
+- **Phase 3C — Tools around protobuf/gRPC:** compare ConnectRPC, expose the same contract through
+  grpc-gateway/OpenAPI, diagnose with grpcurl, and add OpenTelemetry.
 
 The detailed sequence belongs in the [gRPC + Microservices
-roadmap](../docs/learning/grpc-microservices-roadmap.md). These tools are learning extensions, not
-replacements for typed Go tests or the underlying protobuf workflow.
-
-# Buf track in Phase 3
-
-Buf is introduced as a contract-management layer alongside the existing `protoc`/Makefile workflow.
-
-- Start with the local Buf CLI, workspace/module configuration, formatting, and linting.
-- Use `buf breaking` to check whether `v1` to `v2` changes preserve compatibility.
-- Compare `buf generate` with the current `make protos` workflow.
-- Later add dependency management, remote plugins, CI checks, the Buf Schema Registry, and
-  governance.
-
-Useful references:
-
-- [Buf CLI](https://buf.build/docs/cli/)
-- [Buf lint rules](https://buf.build/docs/lint/rules/)
-- [Detecting breaking changes](https://buf.build/docs/breaking/)
-- [Generating code](https://buf.build/docs/generate/)
-
-Keep `protoc` and the Makefile as the baseline while learning Buf; the goal is to understand the
-transition, not to hide the underlying protobuf workflow.
+roadmap](../docs/learning/grpc-microservices-roadmap.md). The primary path remains `grpc-go +
+protobuf + Buf`; Phase 3C extends it without replacing typed Go tests or the underlying protobuf
+workflow.

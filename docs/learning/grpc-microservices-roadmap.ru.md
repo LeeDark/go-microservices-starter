@@ -55,7 +55,7 @@ flowchart TD
   [`grpc-playground/cheatsheet.md`](../../grpc-playground/cheatsheet.md).
 - **Фаза 2 — gRPC на Go:** завершена. В `grpc-playground` есть unary gRPC-сервер и клиент,
   воспроизводимая генерация protobuf-кода и integration test в памяти.
-- **Текущий фокус:** Фаза 3 — Protocol Buffers и проектирование контрактов.
+- **Текущий фокус:** Фаза 3A — проектирование protobuf-контракта.
 - **Трек Buf:** начинается в Phase 3 с локального CLI, linting, проверок совместимости и генерации;
   CI, BSR и governance идут позже.
 - **Дополнительные треки:** ConnectRPC, grpc-gateway, OpenAPI, OpenTelemetry и grpcurl встроены в
@@ -124,7 +124,7 @@ Go](https://grpc.io/docs/languages/go/generated-code/)
 
 ---
 
-## Фаза 3. Protocol Buffers и проектирование контрактов
+## Фаза 3A. Проектирование protobuf-контракта
 
 ### Цель
 
@@ -135,14 +135,6 @@ Go](https://grpc.io/docs/languages/go/generated-code/)
 
 - [Protocol Buffers](https://protobuf.dev/)
 - [Справочник generated-кода | Go](https://grpc.io/docs/languages/go/generated-code/)
-- [Buf CLI](https://buf.build/docs/cli/)
-- [Правила Buf lint](https://buf.build/docs/lint/rules/)
-- [Проверка breaking changes](https://buf.build/docs/breaking/)
-- [Генерация кода с Buf](https://buf.build/docs/generate/)
-- [Connect Go](https://pkg.go.dev/connectrpc.com/connect)
-- [connectrpc/connect-go](https://github.com/connectrpc/connect-go)
-- [grpc-gateway](https://grpc-ecosystem.github.io/grpc-gateway/)
-- [grpc-gateway OpenAPI 3.1](https://grpc-ecosystem.github.io/grpc-gateway/docs/mapping/openapi_v3/)
 
 ### Что нужно понять
 
@@ -152,11 +144,9 @@ Go](https://grpc.io/docs/languages/go/generated-code/)
 - различие между `optional` и `repeated`;
 - соглашения об именовании;
 - как generated-интерфейсы отображаются на Go-код.
-- Buf workspaces и modules;
-- форматирование и linting с Buf;
-- обнаружение breaking changes;
-- воспроизводимая генерация и связь между `buf generate`, `protoc` и Makefile.
-- protobuf annotations для HTTP-маршрутов и подготовка контракта к grpc-gateway/OpenAPI.
+- reserved-номера и имена полей;
+- безопасные и ломающие изменения схемы;
+- связь `.proto` → `protoc` → generated Go API.
 
 ### Практика
 
@@ -173,25 +163,111 @@ Go](https://grpc.io/docs/languages/go/generated-code/)
 - какие изменения ломают совместимость;
 - как регенерация меняет Go-код.
 
-### Путь Buf
+### Definition of Done
 
-Начните с локального Buf CLI и примените его к `helloworld`, чтобы понять существующие lint
-warnings. Затем используйте Buf с контрактами Phase 3 `v1` и `v2`. Текущий workflow
-`protoc`/Makefile сохраняется как база для сравнения перед переходом к генерации Buf и управлению
-зависимостями.
+- существуют контракт `v1` и обратно совместимый `v2`;
+- правила совместимости, включая `reserved`, документированы;
+- изменения generated Go API объяснены;
+- focused tests покрывают старый и новый контракт;
+- Buf, ConnectRPC, gateway, OpenAPI, OpenTelemetry, grpcurl, CI и Schema Registry не входят в эту
+  подфазу.
 
-Дальше трек Buf продолжается темами modules, версий зависимостей, remote plugins, CI-проверок, Buf
-Schema Registry и governance.
+---
 
-### Путь ConnectRPC и HTTP API
+## Фаза 3B. Buf contract workflow
 
-После стабилизации базового контракта сравните ConnectRPC с текущим runtime `grpc-go`. Изучите
-совместимость с gRPC и gRPC-Web, поддержку HTTP/1.1, streaming, доступ из браузера и deployment
-trade-offs, не заменяя основную реализацию.
+### Цель
 
-Затем добавьте grpc-gateway как HTTP/JSON-адаптер поверх того же gRPC-сервиса. Сгенерируйте
-OpenAPI-описание из protobuf и gateway annotations, проверьте его валидатором и зафиксируйте
-возможности gRPC, которые не отображаются напрямую в OpenAPI.
+Применить Buf к уже понятному и документированному protobuf-контракту.
+
+### Что изучить
+
+- [Buf CLI](https://buf.build/docs/cli/)
+- [Правила Buf lint](https://buf.build/docs/lint/rules/)
+- [Проверка breaking changes](https://buf.build/docs/breaking/)
+- [Генерация кода с Buf](https://buf.build/docs/generate/)
+
+### Изучение и практика
+
+- установить и использовать локальный Buf CLI;
+- настроить `buf.yaml`, workspace и module;
+- запустить `buf format` и `buf lint`;
+- разобрать warnings текущего `helloworld` без автоматического изменения контракта;
+- запустить `buf breaking` для `v1` и `v2`;
+- сравнить безопасные и намеренно ломающие изменения;
+- запустить `buf generate` и сравнить его с `protoc` и текущим Makefile;
+- изучить воспроизводимую генерацию, зависимости и версии.
+
+### Definition of Done
+
+- существует локальная Buf-конфигурация;
+- linting и breaking-change проверки запускаются для учебного контракта;
+- generated output воспроизводим;
+- workflow Buf и `protoc` сравнены в документации;
+- принятые, исправленные и отложенные lint warnings зафиксированы;
+- BSR, governance, CI/CD, remote plugins, ConnectRPC, gateway, OpenAPI, OpenTelemetry и grpcurl не
+  входят в эту подфазу.
+
+---
+
+## Фаза 3C. Инструменты вокруг protobuf и gRPC
+
+### Цель
+
+Понять, как один стабильный protobuf/gRPC-контракт поддерживает разные способы доступа, диагностики
+и observability.
+
+### Что изучить
+
+- [Connect Go](https://pkg.go.dev/connectrpc.com/connect)
+- [connectrpc/connect-go](https://github.com/connectrpc/connect-go)
+- [grpc-gateway](https://grpc-ecosystem.github.io/grpc-gateway/)
+- [grpc-gateway OpenAPI 3.1](https://grpc-ecosystem.github.io/grpc-gateway/docs/mapping/openapi_v3/)
+- [OpenTelemetry Go](https://opentelemetry.io/docs/languages/go/)
+- [OpenTelemetry exporters](https://opentelemetry.io/docs/languages/go/exporters/)
+- [grpcurl](https://github.com/fullstorydev/grpcurl)
+
+### Сравнение ConnectRPC
+
+- сравнить ConnectRPC с текущим runtime `grpc-go`;
+- изучить совместимость с gRPC и gRPC-Web, HTTP/1.1, browser access, streaming и deployment
+  trade-offs;
+- создать небольшой сравнительный пример, не заменяя основной путь `grpc-go`.
+
+### grpc-gateway и OpenAPI
+
+- добавить HTTP annotations в стабильный protobuf-контракт;
+- сгенерировать grpc-gateway и вызвать тот же сервис через HTTP/JSON;
+- сравнить ошибки, metadata и deadlines в gRPC и HTTP/JSON;
+- сгенерировать и проверить OpenAPI;
+- документировать возможности gRPC, которые не отображаются напрямую в OpenAPI.
+
+grpc-gateway остаётся адаптером над gRPC, а OpenAPI описывает HTTP-поверхность, не создавая второго
+бизнес-контракта.
+
+### grpcurl
+
+- использовать после появления reflection;
+- просматривать services, methods и messages;
+- вызывать unary RPC с JSON-запросами, metadata и deadlines;
+- работать с `.proto` или protoset descriptors без reflection;
+- использовать для smoke/debug-проверок, а не вместо typed Go tests.
+
+### OpenTelemetry
+
+- instrument incoming и outgoing RPC;
+- собирать traces и metrics;
+- передавать context за границами сервисов и через gRPC metadata;
+- экспортировать данные через OTLP и подключить локальный backend;
+- сравнить observability для gRPC, ConnectRPC и HTTP gateway.
+
+### Definition of Done
+
+- для каждого инструмента есть небольшой ограниченный сравнительный или диагностический пример;
+- основной путь `grpc-go + protobuf + Buf` не изменён;
+- gateway и OpenAPI используют тот же gRPC-контракт;
+- grpcurl применяется после reflection и отдельно от typed tests;
+- OpenTelemetry покрывает RPC и передачу context между сервисами.
 
 ---
 
@@ -567,10 +643,9 @@ Gateway остаётся адаптером поверх gRPC-сервисов, 
 
 ## Далее
 
-- [ ] Проектирование Proto и совместимость
-- [ ] Buf lint, format, breaking и generate
-- [ ] Сравнение ConnectRPC
-- [ ] Основы grpc-gateway и OpenAPI
+- [ ] Phase 3A: проектирование Proto и совместимость
+- [ ] Phase 3B: Buf lint, format, breaking и generate
+- [ ] Phase 3C: ConnectRPC, grpc-gateway, OpenAPI, grpcurl и OpenTelemetry
 - [ ] Metadata
 - [ ] Interceptors
 - [ ] Основы аутентификации
