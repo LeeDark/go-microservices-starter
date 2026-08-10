@@ -148,3 +148,13 @@ Keep entries factual and concise.
 - Verification: Checked the commands and test scope against the implemented
   `catalog/v1/catalog_test.go`; `git diff --check` passed.
 - Notes: Documentation only; test code was not changed.
+
+## 2026-08-10 — Close Phase 3A protobuf contract design
+
+- Scope: Updated bilingual roadmap and cheatsheets with Phase 3A completion status, review evidence,
+  and transition to Phase 3B.
+- Files: Both roadmap translations, both gRPC cheatsheets, and this task history.
+- Verification: Ran `make -C grpc-playground protos`, `GOCACHE=/tmp/go-microservices-starter-gocache
+  go test ./catalog/...`, `GOCACHE=/tmp/go-microservices-starter-gocache go test ./...`, and `git
+  diff --check` successfully.
+- Notes: Phase 3A is closed; Buf work begins in Phase 3B.

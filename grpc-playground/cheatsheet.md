@@ -252,6 +252,12 @@ GOCACHE=/tmp/go-microservices-starter-gocache go test ./...
 
 These are contract and wire-compatibility tests, not service integration tests.
 
+### Phase 3A review and closeout
+
+Phase 3A is complete. The `catalog.v1` and `catalog.v2` contracts, generated Go code, Makefile
+regeneration targets, and focused compatibility tests are in place. Buf and the Phase 3C tools
+intentionally remain outside this phase.
+
 # Phase 3 map
 
 - **Phase 3A — Protobuf contract design:** learn `.proto`, compatibility, `v1`/`v2`, and generated

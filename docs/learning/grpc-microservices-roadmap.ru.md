@@ -55,7 +55,9 @@ flowchart TD
   [`grpc-playground/cheatsheet.md`](../../grpc-playground/cheatsheet.md).
 - **Фаза 2 — gRPC на Go:** завершена. В `grpc-playground` есть unary gRPC-сервер и клиент,
   воспроизводимая генерация protobuf-кода и integration test в памяти.
-- **Текущий фокус:** Фаза 3A — проектирование protobuf-контракта.
+- **Текущий фокус:** Фаза 3B — Buf contract workflow.
+- **Фаза 3A:** завершена. Версии контракта, generated-код, focused tests совместимости и запись
+  review готовы.
 - **Трек Buf:** начинается в Phase 3 с локального CLI, linting, проверок совместимости и генерации;
   CI, BSR и governance идут позже.
 - **Дополнительные треки:** ConnectRPC, grpc-gateway, OpenAPI, OpenTelemetry и grpcurl встроены в
@@ -165,12 +167,21 @@ Go](https://grpc.io/docs/languages/go/generated-code/)
 
 ### Definition of Done
 
-- существуют контракт `v1` и обратно совместимый `v2`;
-- правила совместимости, включая `reserved`, документированы;
-- изменения generated Go API объяснены;
-- focused tests покрывают старый и новый контракт;
-- Buf, ConnectRPC, gateway, OpenAPI, OpenTelemetry, grpcurl, CI и Schema Registry не входят в эту
-  подфазу.
+- [x] существуют контракт `v1` и обратно совместимый `v2`;
+- [x] правила совместимости, включая `reserved`, документированы;
+- [x] изменения generated Go API объяснены;
+- [x] focused tests покрывают старый и новый контракт;
+- [x] Buf, ConnectRPC, gateway, OpenAPI, OpenTelemetry, grpcurl, CI и Schema Registry не входят в
+  эту подфазу.
+
+### Запись review Phase 3A
+
+- Контракты: `catalog/v1/catalog.proto` и `catalog/v2/catalog.proto`.
+- Generated-код: `catalog.pb.go` и `catalog_grpc.pb.go` для обеих версий.
+- Генерация: отдельные цели `protos-catalog-v1` и `protos-catalog-v2` входят в aggregate-цель
+  `protos` Makefile.
+- Тесты: round-trip и проверки совместимости `v1` → `v2` и `v2` → `v1`.
+- Граница: Buf и инструменты Phase 3C не добавлялись.
 
 ---
 
@@ -638,12 +649,12 @@ Gateway остаётся адаптером поверх gRPC-сервисов, 
 - [x] Справочник generated-кода
 - [x] Один unary RPC на Go
 - [ ] Все 4 типа RPC в одном демонстрационном сервисе
-- [ ] Локальный workflow Buf CLI
+- [ ] Phase 3B: локальный workflow Buf CLI
 - [ ] grpcurl: reflection и unary RPC workflow
 
 ## Далее
 
-- [ ] Phase 3A: проектирование Proto и совместимость
+- [x] Phase 3A: проектирование Proto и совместимость
 - [ ] Phase 3B: Buf lint, format, breaking и generate
 - [ ] Phase 3C: ConnectRPC, grpc-gateway, OpenAPI, grpcurl и OpenTelemetry
 - [ ] Metadata

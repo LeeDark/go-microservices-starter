@@ -56,7 +56,9 @@ requests fail, which is a pretty common human hobby.
   [`grpc-playground/cheatsheet.md`](../../grpc-playground/cheatsheet.md).
 - **Phase 2 — gRPC in Go:** complete. `grpc-playground` contains a unary gRPC server and client,
   reproducible protobuf generation, and an in-memory integration test.
-- **Current focus:** Phase 3A — Protobuf contract design.
+- **Current focus:** Phase 3B — Buf contract workflow.
+- **Phase 3A:** complete. The contract versions, generated code, focused compatibility tests, and
+  review record are in place.
 - **Buf track:** starts in Phase 3 with local CLI, linting, compatibility checks, and generation;
   CI, BSR, and governance come later.
 - **Additional tracks:** ConnectRPC, grpc-gateway, OpenAPI, OpenTelemetry, and grpcurl are
@@ -149,12 +151,21 @@ Document for yourself:
 
 ### Definition of Done
 
-- `v1` and a backward-compatible `v2` contract exist;
-- compatibility rules, including `reserved`, are documented;
-- generated Go API changes are explained;
-- focused tests cover old and new contract behavior;
-- no Buf, ConnectRPC, gateway, OpenAPI, OpenTelemetry, grpcurl, CI, or Schema Registry work is
+- [x] `v1` and a backward-compatible `v2` contract exist;
+- [x] compatibility rules, including `reserved`, are documented;
+- [x] generated Go API changes are explained;
+- [x] focused tests cover old and new contract behavior;
+- [x] no Buf, ConnectRPC, gateway, OpenAPI, OpenTelemetry, grpcurl, CI, or Schema Registry work is
   included.
+
+### Phase 3A review record
+
+- Contracts: `catalog/v1/catalog.proto` and `catalog/v2/catalog.proto`.
+- Generated code: `catalog.pb.go` and `catalog_grpc.pb.go` for both versions.
+- Regeneration: separate `protos-catalog-v1` and `protos-catalog-v2` Makefile targets included in
+  the aggregate `protos` target.
+- Tests: round-trip, `v1` → `v2`, and `v2` → `v1` compatibility checks.
+- Boundary: no Buf or Phase 3C tooling was introduced.
 
 ---
 
@@ -567,11 +578,11 @@ Study these after the main path, not before.
 - [x] Generated-code reference
 - [x] One unary RPC in Go
 - [ ] All 4 RPC types in one demo service
-- [ ] Buf local CLI workflow
+- [ ] Phase 3B: Buf local CLI workflow
 - [ ] grpcurl reflection and unary RPC workflow
 
 ## Next
-- [ ] Phase 3A: Proto design and compatibility
+- [x] Phase 3A: Proto design and compatibility
 - [ ] Phase 3B: Buf lint, format, breaking, and generate
 - [ ] Phase 3C: ConnectRPC, grpc-gateway, OpenAPI, grpcurl, and OpenTelemetry
 - [ ] Metadata
