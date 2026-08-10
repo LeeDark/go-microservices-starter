@@ -122,3 +122,12 @@ Keep entries factual and concise.
   `docs/ai/task-history.md`.
 - Verification: Checked both sections and ran `git diff --check` successfully.
 - Notes: Detailed `v1`/`v2` implementation remains a separate Phase 3A task.
+
+## 2026-08-10 — Document catalog v1 and v2 design
+
+- Scope: Added a pre-test Phase 3A cheatsheet description of the current `catalog.v1` and
+  `catalog.v2` contract design and compatible field additions.
+- Files: `grpc-playground/cheatsheet.md` and `docs/ai/task-history.md`.
+- Verification: Checked the description against both `.proto` files and the current Makefile
+  targets; no generated code or tests were changed.
+- Notes: The Russian cheatsheet remains unchanged until the English description is reviewed.

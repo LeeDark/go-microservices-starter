@@ -189,6 +189,44 @@ Do not confuse a source-level rename with a wire-compatible change: the field nu
 meaning are what matter. Detailed `v1`/`v2` practice belongs to Phase 3A; Buf validation starts in
 Phase 3B.
 
+## Phase 3A — `catalog.v1` and `catalog.v2`
+
+The learning contract is a small `CatalogService` with two unary methods:
+
+- `GetProduct(GetProductRequest) returns (GetProductResponse)`;
+- `ListProducts(ListProductsRequest) returns (ListProductsResponse)`.
+
+`v1` contains the initial `Product` shape:
+
+```proto
+message Product {
+  string id = 1;
+  string name = 2;
+  int64 price_cents = 3;
+}
+```
+
+`v2` keeps fields `1–3` unchanged and adds only new field numbers:
+
+```proto
+message Product {
+  string id = 1;
+  string name = 2;
+  int64 price_cents = 3;
+  string description = 4;
+  repeated string tags = 5;
+  ProductStatus status = 6;
+}
+```
+
+`ProductStatus` reserves enum value `0` for the unspecified state and adds `ACTIVE = 1` and
+`ARCHIVED = 2`. The request and response message shapes remain the same between versions, so this
+exercise isolates compatible evolution of the shared `Product` message.
+
+The contracts live in `catalog/v1/catalog.proto` and `catalog/v2/catalog.proto`. The Makefile
+regenerates both versions through separate targets while the current generated Go output is being
+verified before focused tests are added.
+
 # Phase 3 map
 
 - **Phase 3A — Protobuf contract design:** learn `.proto`, compatibility, `v1`/`v2`, and generated

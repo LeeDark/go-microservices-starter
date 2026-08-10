@@ -170,7 +170,8 @@ RPC-обработчики безопасно запускать в конкур
 
 - Номера полей входят в wire format. Нельзя повторно использовать номер для другого смысла.
 - Добавление нового поля с новым номером обычно обратно совместимо: старые клиенты его игнорируют.
-- Добавление нового RPC, message или значения enum обычно безопасно, если не меняется смысл существующих элементов.
+- Добавление нового RPC, message или значения enum обычно безопасно, если не меняется смысл
+  существующих элементов.
 - Изменение типа или номера поля, его смысла, package или формы существующего RPC может сломать
   совместимость.
 - При удалении поля зарезервируйте его номер и имя:
@@ -186,6 +187,44 @@ message Product {
 Не путайте переименование в исходном коде с wire-compatible изменением: важны номер поля и его
 сериализуемый смысл. Подробная практика `v1`/`v2` относится к Phase 3A; Buf-проверки начинаются в
 Phase 3B.
+
+## Phase 3A — проектирование `catalog.v1` и `catalog.v2`
+
+Учебный контракт — небольшой `CatalogService` с двумя unary-методами:
+
+- `GetProduct(GetProductRequest) returns (GetProductResponse)`;
+- `ListProducts(ListProductsRequest) returns (ListProductsResponse)`.
+
+В `v1` определена исходная форма `Product`:
+
+```proto
+message Product {
+  string id = 1;
+  string name = 2;
+  int64 price_cents = 3;
+}
+```
+
+`v2` сохраняет поля `1–3` без изменений и добавляет только новые номера полей:
+
+```proto
+message Product {
+  string id = 1;
+  string name = 2;
+  int64 price_cents = 3;
+  string description = 4;
+  repeated string tags = 5;
+  ProductStatus status = 6;
+}
+```
+
+`ProductStatus` резервирует значение enum `0` для неопределённого состояния и добавляет `ACTIVE = 1`
+и `ARCHIVED = 2`. Формы request и response между версиями остаются одинаковыми, поэтому этот пример
+изолированно показывает совместимое развитие общего сообщения `Product`.
+
+Контракты находятся в `catalog/v1/catalog.proto` и `catalog/v2/catalog.proto`. Makefile
+перегенерирует обе версии через отдельные цели, пока текущий generated Go-код проверяется перед
+добавлением focused tests.
 
 # Карта Phase 3
 
