@@ -226,6 +226,32 @@ message Product {
 перегенерирует обе версии через отдельные цели, пока текущий generated Go-код проверяется перед
 добавлением focused tests.
 
+## Phase 3A — Focused tests для контракта
+
+Focused tests для `catalog.v1` и `catalog.v2` находятся в `catalog/v1/catalog_test.go`. Они напрямую
+проверяют контракт без запуска сервера, открытия порта и внешних сервисов.
+
+Тесты проверяют:
+
+- protobuf round-trip: Go-сообщение → protobuf bytes → Go-сообщение;
+- чтение bytes из `v1` как `v2` с сохранением полей `1–3` и default values новых полей;
+- чтение bytes из `v2` как `v1` с сохранением полей `1–3`, при этом старый тип игнорирует
+  неизвестные поля.
+
+Focused-тесты пакета запускаются так:
+
+```bash
+GOCACHE=/tmp/go-microservices-starter-gocache go test ./catalog/...
+```
+
+Затем запускаются все тесты модуля playground:
+
+```bash
+GOCACHE=/tmp/go-microservices-starter-gocache go test ./...
+```
+
+Это тесты контракта и wire compatibility, а не integration tests сервиса.
+
 # Карта Phase 3
 
 - **Phase 3A — проектирование protobuf-контракта:** изучить `.proto`, совместимость, `v1`/`v2` и

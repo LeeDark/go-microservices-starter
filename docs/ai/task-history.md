@@ -131,3 +131,20 @@ Keep entries factual and concise.
 - Verification: Checked the description against both `.proto` files and the current Makefile
   targets; no generated code or tests were changed.
 - Notes: The Russian cheatsheet remains unchanged until the English description is reviewed.
+
+## 2026-08-10 — Add catalog focused compatibility tests
+
+- Scope: Added contract-focused tests for `catalog.v1` and `catalog.v2` message round-trip and
+  bidirectional wire compatibility.
+- Files: `grpc-playground/catalog/v1/catalog_test.go` and this task history.
+- Verification: Focused and full `grpc-playground` tests are run during handoff.
+- Notes: Tests do not start a server or require external services.
+
+## 2026-08-10 — Document catalog focused tests in cheatsheets
+
+- Scope: Added synchronized English and Russian cheatsheet sections describing contract round-trip
+  and `v1`/`v2` wire-compatibility tests.
+- Files: `grpc-playground/cheatsheet.md`, `grpc-playground/cheatsheet.ru.md`, and this task history.
+- Verification: Checked the commands and test scope against the implemented
+  `catalog/v1/catalog_test.go`; `git diff --check` passed.
+- Notes: Documentation only; test code was not changed.

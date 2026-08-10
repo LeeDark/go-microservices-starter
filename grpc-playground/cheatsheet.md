@@ -227,6 +227,31 @@ The contracts live in `catalog/v1/catalog.proto` and `catalog/v2/catalog.proto`.
 regenerates both versions through separate targets while the current generated Go output is being
 verified before focused tests are added.
 
+## Phase 3A — Focused contract tests
+
+Focused tests for `catalog.v1` and `catalog.v2` live in `catalog/v1/catalog_test.go`. They test the
+contract directly without starting a server, opening a port, or requiring an external service.
+
+The tests cover:
+
+- protobuf round-trip: Go message → protobuf bytes → Go message;
+- `v1` bytes decoded as `v2`, preserving fields `1–3` and leaving new fields at defaults;
+- `v2` bytes decoded as `v1`, preserving fields `1–3` while the old type ignores unknown fields.
+
+Run the focused package tests with:
+
+```bash
+GOCACHE=/tmp/go-microservices-starter-gocache go test ./catalog/...
+```
+
+Then run the complete playground module tests:
+
+```bash
+GOCACHE=/tmp/go-microservices-starter-gocache go test ./...
+```
+
+These are contract and wire-compatibility tests, not service integration tests.
+
 # Phase 3 map
 
 - **Phase 3A — Protobuf contract design:** learn `.proto`, compatibility, `v1`/`v2`, and generated
