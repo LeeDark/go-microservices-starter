@@ -80,3 +80,14 @@ entry at the end. Keep entries factual and concise.
 - Verification: Checked the translated document structure against
   `grpc-playground/cheatsheet.md` and ran `git diff --check` successfully.
 - Notes: Commands, code identifiers, paths, and links were retained.
+
+## 2026-08-10 — Add Russian gRPC roadmap translation
+
+- Scope: Added a Russian translation of the complete gRPC and microservices
+  learning roadmap without changing the English source roadmap.
+- Files: `docs/learning/grpc-microservices-roadmap.ru.md` and
+  `docs/ai/task-history.md`.
+- Verification: Checked that all roadmap phases, checklists, project sequences,
+  links, and the Mermaid learning map were retained; `git diff --check` passed.
+- Notes: Technical identifiers, commands, project names, and URLs were kept in
+  their original form where appropriate.

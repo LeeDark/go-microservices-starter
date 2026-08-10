@@ -68,9 +68,9 @@ message order within each individual stream.
 
 ## Study
 
-- [Quick start | Go](https://grpc.io/docs/languages/go/quickstart/) - [Basics tutorial |
-Go](https://grpc.io/docs/languages/go/basics/) - [Generated-code reference |
-Go](https://grpc.io/docs/languages/go/generated-code/)
+- [Quick start | Go](https://grpc.io/docs/languages/go/quickstart/)
+- [Basics tutorial | Go](https://grpc.io/docs/languages/go/basics/)
+- [Generated-code reference | Go](https://grpc.io/docs/languages/go/generated-code/)
 
 ## Toolchain and code generation
 

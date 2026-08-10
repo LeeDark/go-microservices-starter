@@ -67,9 +67,9 @@ gRPC сохраняет порядок сообщений внутри кажд�
 
 ## Что изучить
 
-- [Quick start | Go](https://grpc.io/docs/languages/go/quickstart/) - [Учебник по основам |
-Go](https://grpc.io/docs/languages/go/basics/) - [Справочник generated-кода |
-Go](https://grpc.io/docs/languages/go/generated-code/)
+- [Quick start | Go](https://grpc.io/docs/languages/go/quickstart/)
+- [Учебник по основам | Go](https://grpc.io/docs/languages/go/basics/)
+- [Справочник generated-кода | Go](https://grpc.io/docs/languages/go/generated-code/)
 
 ## Toolchain и генерация кода
 
@@ -159,7 +159,8 @@ Method(ctx context.Context, request *Request, opts ...grpc.CallOption) (*Respons
 
 ## Обзор generated streaming API
 
-В новых generated streaming API для Go используются generics. Клиентские RPC- вызовы и серверные
+В новых generated streaming API для Go используются generics. Клиентские RPC-вызовы и серверные
 RPC-обработчики безопасно запускать в конкурентных goroutine. Однако внутри одного stream нельзя
 выполнять конкурентные чтения или конкурентные записи; одно чтение и одна запись могут выполняться
 одновременно. Реализация streaming относится к Phase 4.
+
