@@ -113,3 +113,12 @@ Keep entries factual and concise.
   diff --check` successfully.
 - Notes: The primary `grpc-go + protobuf + Buf` path and `protoc`/Makefile baseline remain
   unchanged.
+
+## 2026-08-10 — Add Phase 3A compatibility rules to cheatsheets
+
+- Scope: Added a concise bilingual reference for protobuf field numbers, compatible additions,
+  breaking changes, and `reserved` fields.
+- Files: `grpc-playground/cheatsheet.md`, `grpc-playground/cheatsheet.ru.md`, and
+  `docs/ai/task-history.md`.
+- Verification: Checked both sections and ran `git diff --check` successfully.
+- Notes: Detailed `v1`/`v2` implementation remains a separate Phase 3A task.

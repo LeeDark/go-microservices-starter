@@ -167,6 +167,28 @@ run in concurrent goroutines. Within one stream, however, do not perform concurr
 concurrent writes; one read and one write can proceed independently. Streaming implementation
 belongs to Phase 4.
 
+# Phase 3A — Compatibility rules
+
+Treat the `.proto` schema as a long-lived API contract.
+
+- Field numbers are part of the wire format. Never reuse a field number for a different meaning.
+- Adding a new field with a new number is usually backward-compatible; old clients ignore it.
+- Adding a new RPC, message, or enum value is usually safe when existing meanings remain unchanged.
+- Changing a field type, number, meaning, package, or existing RPC shape can break compatibility.
+- When removing a field, reserve its number and name:
+
+```proto
+message Product {
+  reserved 2;
+  reserved "old_name";
+  string id = 1;
+}
+```
+
+Do not confuse a source-level rename with a wire-compatible change: the field number and serialized
+meaning are what matter. Detailed `v1`/`v2` practice belongs to Phase 3A; Buf validation starts in
+Phase 3B.
+
 # Phase 3 map
 
 - **Phase 3A — Protobuf contract design:** learn `.proto`, compatibility, `v1`/`v2`, and generated
