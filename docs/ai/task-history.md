@@ -92,3 +92,14 @@ Keep entries factual and concise.
   and ran `git diff --check` successfully.
 - Notes: No Buf configuration or repository workflow was implemented; this change updates the
   learning plan only.
+
+## 2026-08-10 — Add adjacent gRPC tooling tracks
+
+- Scope: Extended both roadmaps and cheatsheets with ConnectRPC, grpc-gateway, OpenAPI,
+  OpenTelemetry, and grpcurl as connected learning tracks around the existing `grpc-go` and Buf
+  path.
+- Files: Both roadmap translations, both gRPC cheatsheets, and this task history.
+- Verification: Checked phase placement, bilingual structure, retained the `protoc`/Makefile
+  baseline, and ran `git diff --check` successfully.
+- Notes: Documentation only; no runtime dependencies, generated code, gateway, telemetry, or CLI
+  configuration was added.

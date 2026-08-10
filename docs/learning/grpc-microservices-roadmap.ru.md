@@ -18,7 +18,8 @@ flowchart TD
     C --> D[Учебник по основам Go]
     D --> E[Проектирование Proto и generated-код]
     E --> E2[Buf CLI и workflow контрактов]
-    E2 --> F[Все четыре типа RPC]
+    E2 --> E3[ConnectRPC и HTTP API surface]
+    E3 --> F[Все четыре типа RPC]
     F --> G[Metadata Interceptors Auth]
     G --> H[Deadlines Cancellation Status Codes Errors]
     H --> I[Health Checking Reflection Graceful Shutdown]
@@ -57,6 +58,8 @@ flowchart TD
 - **Текущий фокус:** Фаза 3 — Protocol Buffers и проектирование контрактов.
 - **Трек Buf:** начинается в Phase 3 с локального CLI, linting, проверок совместимости и генерации;
   CI, BSR и governance идут позже.
+- **Дополнительные треки:** ConnectRPC, grpc-gateway, OpenAPI, OpenTelemetry и grpcurl встроены в
+  последующие фазы, но не заменяют основной путь `grpc-go`.
 
 ---
 
@@ -136,6 +139,10 @@ Go](https://grpc.io/docs/languages/go/generated-code/)
 - [Правила Buf lint](https://buf.build/docs/lint/rules/)
 - [Проверка breaking changes](https://buf.build/docs/breaking/)
 - [Генерация кода с Buf](https://buf.build/docs/generate/)
+- [Connect Go](https://pkg.go.dev/connectrpc.com/connect)
+- [connectrpc/connect-go](https://github.com/connectrpc/connect-go)
+- [grpc-gateway](https://grpc-ecosystem.github.io/grpc-gateway/)
+- [grpc-gateway OpenAPI 3.1](https://grpc-ecosystem.github.io/grpc-gateway/docs/mapping/openapi_v3/)
 
 ### Что нужно понять
 
@@ -149,6 +156,7 @@ Go](https://grpc.io/docs/languages/go/generated-code/)
 - форматирование и linting с Buf;
 - обнаружение breaking changes;
 - воспроизводимая генерация и связь между `buf generate`, `protoc` и Makefile.
+- protobuf annotations для HTTP-маршрутов и подготовка контракта к grpc-gateway/OpenAPI.
 
 ### Практика
 
@@ -174,6 +182,16 @@ warnings. Затем используйте Buf с контрактами Phase 
 
 Дальше трек Buf продолжается темами modules, версий зависимостей, remote plugins, CI-проверок, Buf
 Schema Registry и governance.
+
+### Путь ConnectRPC и HTTP API
+
+После стабилизации базового контракта сравните ConnectRPC с текущим runtime `grpc-go`. Изучите
+совместимость с gRPC и gRPC-Web, поддержку HTTP/1.1, streaming, доступ из браузера и deployment
+trade-offs, не заменяя основную реализацию.
+
+Затем добавьте grpc-gateway как HTTP/JSON-адаптер поверх того же gRPC-сервиса. Сгенерируйте
+OpenAPI-описание из protobuf и gateway annotations, проверьте его валидатором и зафиксируйте
+возможности gRPC, которые не отображаются напрямую в OpenAPI.
 
 ---
 
@@ -227,6 +245,7 @@ Schema Registry и governance.
 - передачу auth-токена;
 - передачу tracing-данных или request ID;
 - простые шаблоны middleware в gRPC.
+- context propagation, общий для gRPC, ConnectRPC, grpc-gateway и OpenTelemetry.
 
 ### Практика
 
@@ -311,6 +330,8 @@ Schema Registry и governance.
 
 Сервис, который можно запустить, проверить и корректно остановить.
 
+Используйте `grpcurl` для ручных smoke- и debugging-проверок, а не вместо типизированных Go-тестов.
+
 У проекта также должно быть документированное место для Buf-проверок в CI, даже если первая
 реализация пока остаётся локальной.
 
@@ -394,6 +415,9 @@ Schema Registry и governance.
 - [Keepalive](https://grpc.io/docs/guides/keepalive/)
 - [Flow Control](https://grpc.io/docs/guides/flow-control/)
 - [Compression](https://grpc.io/docs/guides/compression/)
+- [OpenTelemetry Go](https://opentelemetry.io/docs/languages/go/)
+- [OpenTelemetry exporters](https://opentelemetry.io/docs/languages/go/exporters/)
+- [grpcurl](https://github.com/fullstorydev/grpcurl)
 
 ### Что нужно понять
 
@@ -402,7 +426,11 @@ Schema Registry и governance.
 - повторное использование соединений;
 - компромиссы keepalive;
 - backpressure и flow control в streaming;
-- когда compression помогает, а когда мешает.
+- когда compression помогает, а когда мешает;
+- traces для входящих и исходящих RPC;
+- metrics для количества запросов, latency, ошибок и размеров сообщений;
+- context propagation за границами сервисов;
+- OTLP export и локальный telemetry backend.
 
 ### Практика
 
@@ -411,7 +439,8 @@ Schema Registry и governance.
 - пропускную способность unary и streaming;
 - маленькие и большие payloads;
 - работу с compression и без неё;
-- работу с настройкой keepalive и без неё.
+- работу с настройкой keepalive и без неё;
+- observability для gRPC, ConnectRPC и HTTP gateway.
 
 ### Результат
 
@@ -474,9 +503,18 @@ README с описанием:
 - критических сценариев отказа;
 - правил retry и timeout.
 
+Также README должен описывать:
+
+- внутренние gRPC-вызовы и HTTP/JSON gateway surface;
+- OpenAPI-документацию;
+- grpcurl smoke checks;
+- OpenTelemetry между сервисами.
+
 Проект также должен использовать Buf для общих контрактов между сервисами. Нужно изучить публикацию
 и потребление схем через Buf Schema Registry, версионирование, доступ, распространение и правила
 совместимости между сервисами и командами.
+
+Gateway остаётся адаптером поверх gRPC-сервисов, а не вторым бизнес-контрактом.
 
 ---
 
@@ -497,6 +535,10 @@ README с описанием:
 - [Remote plugins и генерация](https://buf.build/docs/generate/)
 - [Managed mode](https://buf.build/docs/generate/managed-mode/)
 - [Buf governance и policy](https://buf.build/docs/bsr/)
+- [ConnectRPC](https://pkg.go.dev/connectrpc.com/connect) и его protocol/runtime trade-offs
+- OpenAPI limitations и deployment patterns для gateway
+- OpenTelemetry sampling, exporters и backend integration
+- grpcurl с descriptor/protoset и без reflection
 
 ### Примечания
 
@@ -521,11 +563,14 @@ README с описанием:
 - [x] Один unary RPC на Go
 - [ ] Все 4 типа RPC в одном демонстрационном сервисе
 - [ ] Локальный workflow Buf CLI
+- [ ] grpcurl: reflection и unary RPC workflow
 
 ## Далее
 
 - [ ] Проектирование Proto и совместимость
 - [ ] Buf lint, format, breaking и generate
+- [ ] Сравнение ConnectRPC
+- [ ] Основы grpc-gateway и OpenAPI
 - [ ] Metadata
 - [ ] Interceptors
 - [ ] Основы аутентификации
@@ -545,6 +590,7 @@ README с описанием:
 - [ ] Name resolution
 - [ ] Load balancing
 - [ ] Метрики OpenTelemetry
+- [ ] Traces OpenTelemetry и context propagation
 - [ ] Настройка производительности
 - [ ] Keepalive
 - [ ] Flow control
@@ -554,6 +600,8 @@ README с описанием:
 - [ ] Buf Schema Registry и распространение контрактов
 - [ ] gRPC-Web / ALTS / дополнительные advanced topics
 - [ ] Buf modules, remote plugins, managed mode и governance
+- [ ] grpcurl с protoset и без reflection
+- [ ] Расширенные темы ConnectRPC, gateway и OpenAPI
 
 ---
 
@@ -587,6 +635,9 @@ README с описанием:
 - health checking;
 - reflection.
 - Buf linting, проверки breaking changes и воспроизводимая генерация.
+- сравнение ConnectRPC;
+- HTTP/JSON gateway и OpenAPI surface;
+- grpcurl smoke checks.
 
 ## Проект 3. `grpc-micro-lab`
 
@@ -602,6 +653,7 @@ README с описанием:
 - один эксперимент с load balancing;
 - архитектурный README.
 - общие контракты, управляемые через Buf modules или Buf Schema Registry.
+- HTTP/JSON gateway, OpenAPI-документация и OpenTelemetry между сервисами.
 
 ---
 

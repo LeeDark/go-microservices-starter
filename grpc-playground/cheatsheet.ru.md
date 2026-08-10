@@ -164,6 +164,22 @@ RPC-обработчики безопасно запускать в конкур
 выполнять конкурентные чтения или конкурентные записи; одно чтение и одна запись могут выполняться
 одновременно. Реализация streaming относится к Phase 4.
 
+# Дополнительные инструментальные треки
+
+Основной путь обучения остаётся `grpc-go + protobuf + Buf`. Эти инструменты расширяют его, но не
+заменяют:
+
+- **ConnectRPC**: сравнение альтернативного RPC runtime, совместимого с gRPC и gRPC-Web;
+- **grpc-gateway + OpenAPI**: публикация того же protobuf/gRPC-контракта через HTTP/JSON и описание
+  этой поверхности;
+- **OpenTelemetry**: instrumentation RPC, gateway и межсервисных вызовов с traces, metrics,
+  propagation и OTLP;
+- **grpcurl**: просмотр и ручной вызов сервисов через reflection, `.proto` или protoset descriptors.
+
+Подробная последовательность находится в [roadmap gRPC +
+микросервисов](../docs/learning/grpc-microservices-roadmap.ru.md). Эти инструменты расширяют
+обучение, но не заменяют типизированные Go-тесты и основной protobuf workflow.
+
 # Трек Buf в Phase 3
 
 Buf подключается как слой управления контрактами рядом с существующим workflow `protoc`/Makefile.

@@ -167,6 +167,23 @@ run in concurrent goroutines. Within one stream, however, do not perform concurr
 concurrent writes; one read and one write can proceed independently. Streaming implementation
 belongs to Phase 4.
 
+# Adjacent tooling tracks
+
+The main learning path remains `grpc-go + protobuf + Buf`. These tools extend that path without
+replacing it:
+
+- **ConnectRPC**: compare an alternative RPC runtime that is compatible with gRPC and gRPC-Web.
+- **grpc-gateway + OpenAPI**: expose the same protobuf/gRPC contract through HTTP/JSON and document
+  that surface.
+- **OpenTelemetry**: instrument RPC, gateway, and service-to-service calls with traces, metrics,
+  propagation, and OTLP.
+- **grpcurl**: inspect and manually invoke services through reflection, `.proto`, or protoset
+  descriptors.
+
+The detailed sequence belongs in the [gRPC + Microservices
+roadmap](../docs/learning/grpc-microservices-roadmap.md). These tools are learning extensions, not
+replacements for typed Go tests or the underlying protobuf workflow.
+
 # Buf track in Phase 3
 
 Buf is introduced as a contract-management layer alongside the existing `protoc`/Makefile workflow.
