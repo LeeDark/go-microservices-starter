@@ -71,3 +71,12 @@ entry at the end. Keep entries factual and concise.
 - Verification: Checked service ports, frontend endpoint configuration, and
   internal links against the current source tree.
 - Notes: Component-specific README files remain pending individual review.
+
+## 2026-08-10 — Add Russian gRPC cheatsheet translation
+
+- Scope: Added a Russian translation of the Phase 1–2 gRPC cheatsheet while
+  preserving the English source document and technical identifiers.
+- Files: `grpc-playground/cheatsheet.ru.md` and `docs/ai/task-history.md`.
+- Verification: Checked the translated document structure against
+  `grpc-playground/cheatsheet.md` and ran `git diff --check` successfully.
+- Notes: Commands, code identifiers, paths, and links were retained.
