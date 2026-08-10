@@ -158,3 +158,32 @@ Keep entries factual and concise.
   go test ./catalog/...`, `GOCACHE=/tmp/go-microservices-starter-gocache go test ./...`, and `git
   diff --check` successfully.
 - Notes: Phase 3A is closed; Buf work begins in Phase 3B.
+
+## 2026-08-11 — Establish Phase 3B protoc baseline
+
+- Scope: Verified the existing `protoc` + Makefile workflow before introducing Buf.
+- Baseline: `protoc` 35.1, `protoc-gen-go` v1.36.11, `protoc-gen-go-grpc` 1.6.2, and Go 1.26.4.
+- Generation: `grpc-playground/Makefile` regenerates `helloworld`, `catalog/v1`, and `catalog/v2`
+  through the aggregate `protos` target with source-relative paths.
+- Verification: `make protos`, focused `catalog` tests, full `grpc-playground` tests, and
+  `git diff --check` passed; regeneration produced no working-tree changes.
+- Notes: This baseline is the comparison point for Buf format, lint, breaking, and generate.
+
+## 2026-08-11 — Initialize Phase 3B Buf module configuration
+
+- Scope: Added a local `grpc-playground/buf.yaml` using Buf configuration v2 and the standard lint
+  and file-level breaking profiles.
+- Verification: Buf 1.72.0 discovered `helloworld/helloworld/helloworld.proto`,
+  `catalog/v1/catalog.proto`, and `catalog/v2/catalog.proto`; `command buf lint` ran successfully
+  and reported the expected existing `helloworld` naming and package warnings.
+- Notes: No `.proto` contracts or generated Go files were changed. The warnings remain for the
+  planned lint review step.
+
+## 2026-08-11 — Apply Buf formatting to catalog contracts
+
+- Scope: Applied `buf format` to `catalog/v1/catalog.proto` and `catalog/v2/catalog.proto`.
+- Changes: Normalized indentation, `go_package` formatting, and final newlines; no contract meaning,
+  package, field number, or service API was changed.
+- Verification: `command buf format --diff --exit-code`, `make protos`, focused catalog tests, full
+  `grpc-playground` tests, and `git diff --check` passed.
+- Notes: `helloworld.proto` required no formatting changes.
