@@ -68,9 +68,9 @@ message order within each individual stream.
 
 ## Study
 
-- [Quick start | Go](https://grpc.io/docs/languages/go/quickstart/)
-- [Basics tutorial | Go](https://grpc.io/docs/languages/go/basics/)
-- [Generated-code reference | Go](https://grpc.io/docs/languages/go/generated-code/)
+- [Quick start | Go](https://grpc.io/docs/languages/go/quickstart/) - [Basics tutorial |
+Go](https://grpc.io/docs/languages/go/basics/) - [Generated-code reference |
+Go](https://grpc.io/docs/languages/go/generated-code/)
 
 ## Toolchain and code generation
 
@@ -166,3 +166,23 @@ Newly generated Go streaming APIs use generics. Client RPC calls and server RPC 
 run in concurrent goroutines. Within one stream, however, do not perform concurrent reads or
 concurrent writes; one read and one write can proceed independently. Streaming implementation
 belongs to Phase 4.
+
+# Buf track in Phase 3
+
+Buf is introduced as a contract-management layer alongside the existing `protoc`/Makefile workflow.
+
+- Start with the local Buf CLI, workspace/module configuration, formatting, and linting.
+- Use `buf breaking` to check whether `v1` to `v2` changes preserve compatibility.
+- Compare `buf generate` with the current `make protos` workflow.
+- Later add dependency management, remote plugins, CI checks, the Buf Schema Registry, and
+  governance.
+
+Useful references:
+
+- [Buf CLI](https://buf.build/docs/cli/)
+- [Buf lint rules](https://buf.build/docs/lint/rules/)
+- [Detecting breaking changes](https://buf.build/docs/breaking/)
+- [Generating code](https://buf.build/docs/generate/)
+
+Keep `protoc` and the Makefile as the baseline while learning Buf; the goal is to understand the
+transition, not to hide the underlying protobuf workflow.

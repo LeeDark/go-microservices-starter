@@ -1,12 +1,11 @@
 # gRPC + микросервисы на Go: roadmap
 
-Практический roadmap для изучения **gRPC на Go** и последующего перехода к
-**микросервисному мышлению** без слабых книг и случайных фрагментов учебников.
+Практический roadmap для изучения **gRPC на Go** и последующего перехода к **микросервисному
+мышлению** без слабых книг и случайных фрагментов учебников.
 
-Этот roadmap построен на идее, что сначала нужно изучить **gRPC как технологию
-взаимодействия**, затем **gRPC на Go**, потом **production-механику**, и только
-после этого рассматривать gRPC как часть более широкой микросервисной
-архитектуры.
+Этот roadmap построен на идее, что сначала нужно изучить **gRPC как технологию взаимодействия**,
+затем **gRPC на Go**, потом **production-механику**, и только после этого рассматривать gRPC как
+часть более широкой микросервисной архитектуры.
 
 ---
 
@@ -18,7 +17,8 @@ flowchart TD
     B --> C[Go Quick Start]
     C --> D[Учебник по основам Go]
     D --> E[Проектирование Proto и generated-код]
-    E --> F[Все четыре типа RPC]
+    E --> E2[Buf CLI и workflow контрактов]
+    E2 --> F[Все четыре типа RPC]
     F --> G[Metadata Interceptors Auth]
     G --> H[Deadlines Cancellation Status Codes Errors]
     H --> I[Health Checking Reflection Graceful Shutdown]
@@ -43,9 +43,8 @@ flowchart TD
 4. **Надёжность и observability**
 5. **Микросервисная архитектура вокруг gRPC**
 
-Этот порядок важен. Иначе можно получить три сервиса, пять контейнеров и не
-понять, почему запросы завершаются ошибкой. Это довольно распространённое
-человеческое увлечение.
+Этот порядок важен. Иначе можно получить три сервиса, пять контейнеров и не понять, почему запросы
+завершаются ошибкой. Это довольно распространённое человеческое увлечение.
 
 ---
 
@@ -53,9 +52,11 @@ flowchart TD
 
 - **Фаза 1 — Основы gRPC:** завершена. Конспект находится в
   [`grpc-playground/cheatsheet.md`](../../grpc-playground/cheatsheet.md).
-- **Фаза 2 — gRPC на Go:** завершена. В `grpc-playground` есть unary gRPC-сервер
-  и клиент, воспроизводимая генерация protobuf-кода и integration test в памяти.
+- **Фаза 2 — gRPC на Go:** завершена. В `grpc-playground` есть unary gRPC-сервер и клиент,
+  воспроизводимая генерация protobuf-кода и integration test в памяти.
 - **Текущий фокус:** Фаза 3 — Protocol Buffers и проектирование контрактов.
+- **Трек Buf:** начинается в Phase 3 с локального CLI, linting, проверок совместимости и генерации;
+  CI, BSR и governance идут позже.
 
 ---
 
@@ -63,8 +64,7 @@ flowchart TD
 
 ### Цель
 
-Понять, что такое gRPC, как выполняются RPC-вызовы и чем gRPC отличается от
-обычных HTTP+JSON API.
+Понять, что такое gRPC, как выполняются RPC-вызовы и чем gRPC отличается от обычных HTTP+JSON API.
 
 ### Что изучить
 
@@ -98,9 +98,9 @@ flowchart TD
 
 ### Что изучить
 
-- [Quick start | Go](https://grpc.io/docs/languages/go/quickstart/)
-- [Учебник по основам | Go](https://grpc.io/docs/languages/go/basics/)
-- [Справочник generated-кода | Go](https://grpc.io/docs/languages/go/generated-code/)
+- [Quick start | Go](https://grpc.io/docs/languages/go/quickstart/) - [Учебник по основам |
+Go](https://grpc.io/docs/languages/go/basics/) - [Справочник generated-кода |
+Go](https://grpc.io/docs/languages/go/generated-code/)
 
 ### Что нужно понять
 
@@ -125,13 +125,17 @@ flowchart TD
 
 ### Цель
 
-Научиться воспринимать `.proto` как API-контракт, а не просто как файл с
-синтаксисом, который передаётся в `protoc`.
+Научиться воспринимать `.proto` как API-контракт, а не просто как файл с синтаксисом, который
+передаётся в `protoc`.
 
 ### Что изучить
 
 - [Protocol Buffers](https://protobuf.dev/)
 - [Справочник generated-кода | Go](https://grpc.io/docs/languages/go/generated-code/)
+- [Buf CLI](https://buf.build/docs/cli/)
+- [Правила Buf lint](https://buf.build/docs/lint/rules/)
+- [Проверка breaking changes](https://buf.build/docs/breaking/)
+- [Генерация кода с Buf](https://buf.build/docs/generate/)
 
 ### Что нужно понять
 
@@ -141,6 +145,10 @@ flowchart TD
 - различие между `optional` и `repeated`;
 - соглашения об именовании;
 - как generated-интерфейсы отображаются на Go-код.
+- Buf workspaces и modules;
+- форматирование и linting с Buf;
+- обнаружение breaking changes;
+- воспроизводимая генерация и связь между `buf generate`, `protoc` и Makefile.
 
 ### Практика
 
@@ -156,6 +164,16 @@ flowchart TD
 - какие изменения безопасны;
 - какие изменения ломают совместимость;
 - как регенерация меняет Go-код.
+
+### Путь Buf
+
+Начните с локального Buf CLI и примените его к `helloworld`, чтобы понять существующие lint
+warnings. Затем используйте Buf с контрактами Phase 3 `v1` и `v2`. Текущий workflow
+`protoc`/Makefile сохраняется как база для сравнения перед переходом к генерации Buf и управлению
+зависимостями.
+
+Дальше трек Buf продолжается темами modules, версий зависимостей, remote plugins, CI-проверок, Buf
+Schema Registry и governance.
 
 ---
 
@@ -229,8 +247,7 @@ flowchart TD
 
 ### Цель
 
-Корректно обрабатывать ошибки вместо случайного `fmt.Errorf` с привкусом
-грусти.
+Корректно обрабатывать ошибки вместо случайного `fmt.Errorf` с привкусом грусти.
 
 ### Что изучить
 
@@ -288,10 +305,14 @@ flowchart TD
 - health service;
 - reflection в режиме разработки;
 - обработку сигналов с graceful shutdown.
+- CI-проверки protobuf linting, breaking changes и согласованности generated-кода.
 
 ### Результат
 
 Сервис, который можно запустить, проверить и корректно остановить.
+
+У проекта также должно быть документированное место для Buf-проверок в CI, даже если первая
+реализация пока остаётся локальной.
 
 ---
 
@@ -406,9 +427,8 @@ flowchart TD
 
 ### Важное замечание
 
-Официальная документация gRPC хорошо объясняет **механику RPC**, но **не
-является полным курсом по микросервисной архитектуре**. Эту часть нужно
-изучать отдельно.
+Официальная документация gRPC хорошо объясняет **механику RPC**, но **не является полным курсом по
+микросервисной архитектуре**. Эту часть нужно изучать отдельно.
 
 ### Рекомендуемые дополнительные roadmaps
 
@@ -454,6 +474,10 @@ README с описанием:
 - критических сценариев отказа;
 - правил retry и timeout.
 
+Проект также должен использовать Buf для общих контрактов между сервисами. Нужно изучить публикацию
+и потребление схем через Buf Schema Registry, версионирование, доступ, распространение и правила
+совместимости между сервисами и командами.
+
 ---
 
 ## Фаза 12. Дополнительные advanced topics
@@ -466,13 +490,22 @@ README с описанием:
 - [ALTS](https://grpc.io/docs/guides/alts/)
 - [Debugging](https://grpc.io/docs/guides/debugging/)
 - [Custom backend metrics](https://grpc.io/docs/guides/custom-backend-metrics/)
-- [Reflection](https://grpc.io/docs/guides/reflection/) в сценариях с большим количеством инструментов
+- [Reflection](https://grpc.io/docs/guides/reflection/) в сценариях с большим количеством
+  инструментов
+- [Buf Schema Registry](https://buf.build/docs/bsr/introduction/)
+- [Buf modules и dependencies](https://buf.build/docs/cli/modules/)
+- [Remote plugins и генерация](https://buf.build/docs/generate/)
+- [Managed mode](https://buf.build/docs/generate/managed-mode/)
+- [Buf governance и policy](https://buf.build/docs/bsr/)
 
 ### Примечания
 
 - **gRPC-Web** важен, если клиентом является браузер.
 - **ALTS** не относится к первоочередным темам для обычной backend-разработки.
 - **Инструменты отладки** становятся полезнее после появления реальных сервисов.
+- **Расширенные workflow Buf** относятся к этому уровню: remote modules и plugins, managed mode,
+  registry workflows, policy-as-code, CI/CD-интеграции и масштабирование protobuf governance в
+  монорепозитории.
 
 ---
 
@@ -487,10 +520,12 @@ README с описанием:
 - [x] Справочник generated-кода
 - [x] Один unary RPC на Go
 - [ ] Все 4 типа RPC в одном демонстрационном сервисе
+- [ ] Локальный workflow Buf CLI
 
 ## Далее
 
 - [ ] Проектирование Proto и совместимость
+- [ ] Buf lint, format, breaking и generate
 - [ ] Metadata
 - [ ] Interceptors
 - [ ] Основы аутентификации
@@ -515,7 +550,10 @@ README с описанием:
 - [ ] Flow control
 - [ ] Compression
 - [ ] Учебный multi-service проект
+- [ ] Buf CI-проверки и policy для generated-кода
+- [ ] Buf Schema Registry и распространение контрактов
 - [ ] gRPC-Web / ALTS / дополнительные advanced topics
+- [ ] Buf modules, remote plugins, managed mode и governance
 
 ---
 
@@ -548,6 +586,7 @@ README с описанием:
 - graceful shutdown;
 - health checking;
 - reflection.
+- Buf linting, проверки breaking changes и воспроизводимая генерация.
 
 ## Проект 3. `grpc-micro-lab`
 
@@ -562,6 +601,7 @@ README с описанием:
 - правила timeout;
 - один эксперимент с load balancing;
 - архитектурный README.
+- общие контракты, управляемые через Buf modules или Buf Schema Registry.
 
 ---
 
@@ -581,8 +621,8 @@ README с описанием:
 
 # Напутствие
 
-Не ищите один магический ресурс, который идеально обучит **gRPC + Go +
-микросервисам + production + архитектуре + observability**.
+Не ищите один магический ресурс, который идеально обучит **gRPC + Go + микросервисам + production +
+архитектуре + observability**.
 
 Такого ресурса почти наверняка не существует.
 

@@ -1,8 +1,11 @@
 # gRPC + Microservices in Go Roadmap
 
-A practical roadmap for learning **gRPC in Go** and then extending it into **microservices thinking** without relying on weak books or random tutorial fragments.
+A practical roadmap for learning **gRPC in Go** and then extending it into **microservices
+thinking** without relying on weak books or random tutorial fragments.
 
-This roadmap is built around the idea that you should first learn **gRPC as a communication technology**, then **gRPC in Go**, then **production concerns**, and only after that treat it as part of a broader microservice architecture.
+This roadmap is built around the idea that you should first learn **gRPC as a communication
+technology**, then **gRPC in Go**, then **production concerns**, and only after that treat it as
+part of a broader microservice architecture.
 
 ---
 
@@ -14,7 +17,8 @@ flowchart TD
     B --> C[Go Quick Start]
     C --> D[Go Basics tutorial]
     D --> E[Proto design and generated code]
-    E --> F[All four RPC types]
+    E --> E2[Buf CLI contract workflow]
+    E2 --> F[All four RPC types]
     F --> G[Metadata Interceptors Auth]
     G --> H[Deadlines Cancellation Status Codes Errors]
     H --> I[Health Checking Reflection Graceful Shutdown]
@@ -39,7 +43,8 @@ Start with this order:
 4. **Reliability and observability**
 5. **Microservice architecture around gRPC**
 
-That order matters. Otherwise you end up with three services, five containers, and no idea why requests fail, which is a pretty common human hobby.
+That order matters. Otherwise you end up with three services, five containers, and no idea why
+requests fail, which is a pretty common human hobby.
 
 ---
 
@@ -47,17 +52,19 @@ That order matters. Otherwise you end up with three services, five containers, a
 
 - **Phase 1 — Core gRPC foundation:** complete. Notes are in
   [`grpc-playground/cheatsheet.md`](../../grpc-playground/cheatsheet.md).
-- **Phase 2 — gRPC in Go:** complete. `grpc-playground` contains a unary gRPC
-  server and client, reproducible protobuf generation, and an in-memory
-  integration test.
+- **Phase 2 — gRPC in Go:** complete. `grpc-playground` contains a unary gRPC server and client,
+  reproducible protobuf generation, and an in-memory integration test.
 - **Current focus:** Phase 3 — Protocol Buffers and contract design.
+- **Buf track:** starts in Phase 3 with local CLI, linting, compatibility checks, and generation;
+  CI, BSR, and governance come later.
 
 ---
 
 ## Phase 1. Core gRPC foundation
 
 ### Goal
-Understand what gRPC is, how RPC calls work, and what makes gRPC different from ordinary HTTP+JSON APIs.
+Understand what gRPC is, how RPC calls work, and what makes gRPC different from ordinary HTTP+JSON
+APIs.
 
 ### Study
 - [Introduction to gRPC](https://grpc.io/docs/what-is-grpc/introduction/)
@@ -85,9 +92,9 @@ Write a short personal note answering:
 Be able to create and run a basic gRPC server and client in Go.
 
 ### Study
-- [Quick start | Go](https://grpc.io/docs/languages/go/quickstart/)
-- [Basics tutorial | Go](https://grpc.io/docs/languages/go/basics/)
-- [Generated-code reference | Go](https://grpc.io/docs/languages/go/generated-code/)
+- [Quick start | Go](https://grpc.io/docs/languages/go/quickstart/) - [Basics tutorial |
+Go](https://grpc.io/docs/languages/go/basics/) - [Generated-code reference |
+Go](https://grpc.io/docs/languages/go/generated-code/)
 
 ### What to learn
 - How to define a `.proto` file
@@ -113,6 +120,10 @@ Treat `.proto` as an API contract, not just a syntax file you feed to `protoc`.
 ### Study
 - [Protocol Buffers](https://protobuf.dev/)
 - [Generated-code reference | Go](https://grpc.io/docs/languages/go/generated-code/)
+- [Buf CLI](https://buf.build/docs/cli/)
+- [Buf lint rules](https://buf.build/docs/lint/rules/)
+- [Detecting breaking changes](https://buf.build/docs/breaking/)
+- [Generating code with Buf](https://buf.build/docs/generate/)
 
 ### What to learn
 - `package` and `go_package`
@@ -121,6 +132,10 @@ Treat `.proto` as an API contract, not just a syntax file you feed to `protoc`.
 - optional vs repeated fields
 - naming conventions
 - how generated interfaces map to Go code
+- Buf workspaces and modules
+- formatting and linting with Buf
+- breaking-change detection
+- reproducible generation and the relationship between `buf generate`, `protoc`, and the Makefile
 
 ### Practice
 Design 2 versions of the same API:
@@ -132,6 +147,15 @@ Document for yourself:
 - what changes are safe
 - what changes break compatibility
 - what regeneration changes in Go
+
+### Buf progression
+
+Start with the local Buf CLI and apply it to `helloworld` to understand the existing lint warnings.
+Then use Buf with the Phase 3 `v1` and `v2` contracts. Keep the current `protoc`/Makefile workflow
+as a comparison baseline before moving to Buf generation and dependency management.
+
+The broader Buf path continues later with modules, dependency versions, remote plugins, CI checks,
+the Buf Schema Registry, and governance.
 
 ---
 
@@ -241,9 +265,13 @@ Add:
 - health service
 - reflection in dev mode
 - signal handling with graceful shutdown
+- CI checks for protobuf linting, breaking changes, and generated-code consistency
 
 ### Deliverable
 A service that can be run, probed, and stopped correctly.
+
+The project should also have a documented place for Buf checks in its CI workflow, even if the first
+implementation remains local.
 
 ---
 
@@ -339,7 +367,8 @@ A simple benchmark report in Markdown.
 Use gRPC inside a meaningful multi-service architecture.
 
 ### Important note
-The official gRPC docs are strong on **RPC mechanics**, but they are **not a full course in microservice architecture**. That part you should learn separately.
+The official gRPC docs are strong on **RPC mechanics**, but they are **not a full course in
+microservice architecture**. That part you should learn separately.
 
 ### Recommended companion maps
 - [Go roadmap](https://roadmap.sh/golang)
@@ -378,6 +407,10 @@ A README explaining:
 - critical failure paths
 - retry and timeout rules
 
+The project should also use Buf for shared contracts between services. Study publishing and
+consuming schemas through the Buf Schema Registry, versioning, access, distribution, and
+compatibility rules between services and teams.
+
 ---
 
 ## Phase 12. Optional advanced topics
@@ -390,11 +423,18 @@ Study these after the main path, not before.
 - [Debugging](https://grpc.io/docs/guides/debugging/)
 - [Custom backend metrics](https://grpc.io/docs/guides/custom-backend-metrics/)
 - [Reflection](https://grpc.io/docs/guides/reflection/) in tooling-heavy workflows
+- [Buf Schema Registry](https://buf.build/docs/bsr/introduction/)
+- [Buf modules and dependencies](https://buf.build/docs/cli/modules/)
+- [Remote plugins and generation](https://buf.build/docs/generate/)
+- [Managed mode](https://buf.build/docs/generate/managed-mode/)
+- [Buf governance and policy](https://buf.build/docs/bsr/)
 
 ### Notes
 - **gRPC-Web** matters if your client is a browser.
 - **ALTS** is not a first-priority topic for ordinary backend work.
 - **Debugging tools** become more useful once you already have real services.
+- **Buf advanced workflows** belong here: remote modules and plugins, managed mode, registry
+  workflows, policy-as-code, CI/CD integrations, and scaling protobuf governance across a monorepo.
 
 ---
 
@@ -408,9 +448,11 @@ Study these after the main path, not before.
 - [x] Generated-code reference
 - [x] One unary RPC in Go
 - [ ] All 4 RPC types in one demo service
+- [ ] Buf local CLI workflow
 
 ## Next
 - [ ] Proto design and compatibility
+- [ ] Buf lint, format, breaking, and generate
 - [ ] Metadata
 - [ ] Interceptors
 - [ ] Authentication basics
@@ -434,7 +476,10 @@ Study these after the main path, not before.
 - [ ] Flow control
 - [ ] Compression
 - [ ] Multi-service training project
+- [ ] Buf CI checks and generated-code policy
+- [ ] Buf Schema Registry and contract distribution
 - [ ] gRPC-Web / ALTS / advanced extras
+- [ ] Buf modules, remote plugins, managed mode, and governance
 
 ---
 
@@ -463,6 +508,7 @@ Add:
 - graceful shutdown
 - health checking
 - reflection
+- Buf linting, breaking-change checks, and reproducible generation
 
 ## Project 3. `grpc-micro-lab`
 Three services with realistic behavior.
@@ -475,6 +521,7 @@ Add:
 - timeout rules
 - one load balancing experiment
 - architecture README
+- shared contracts managed through Buf modules or the Buf Schema Registry
 
 ---
 
@@ -494,7 +541,8 @@ That is the whole trick. Not glamorous, not mystical, just effective.
 
 # Final advice
 
-Do not search for one magical resource that teaches **gRPC + Go + microservices + production + architecture + observability** perfectly in one place.
+Do not search for one magical resource that teaches **gRPC + Go + microservices + production +
+architecture + observability** perfectly in one place.
 
 That resource rarely exists.
 

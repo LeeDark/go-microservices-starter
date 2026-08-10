@@ -67,9 +67,9 @@ gRPC сохраняет порядок сообщений внутри кажд�
 
 ## Что изучить
 
-- [Quick start | Go](https://grpc.io/docs/languages/go/quickstart/)
-- [Учебник по основам | Go](https://grpc.io/docs/languages/go/basics/)
-- [Справочник generated-кода | Go](https://grpc.io/docs/languages/go/generated-code/)
+- [Quick start | Go](https://grpc.io/docs/languages/go/quickstart/) - [Учебник по основам |
+Go](https://grpc.io/docs/languages/go/basics/) - [Справочник generated-кода |
+Go](https://grpc.io/docs/languages/go/generated-code/)
 
 ## Toolchain и генерация кода
 
@@ -164,3 +164,22 @@ RPC-обработчики безопасно запускать в конкур
 выполнять конкурентные чтения или конкурентные записи; одно чтение и одна запись могут выполняться
 одновременно. Реализация streaming относится к Phase 4.
 
+# Трек Buf в Phase 3
+
+Buf подключается как слой управления контрактами рядом с существующим workflow `protoc`/Makefile.
+
+- Начните с локального Buf CLI, настройки workspace/module, форматирования и linting.
+- Используйте `buf breaking`, чтобы проверить совместимость изменений `v1` → `v2`.
+- Сравните `buf generate` с текущим workflow `make protos`.
+- Позже добавьте управление зависимостями, remote plugins, CI-проверки, Buf Schema Registry и
+  governance.
+
+Полезные материалы:
+
+- [Buf CLI](https://buf.build/docs/cli/)
+- [Правила Buf lint](https://buf.build/docs/lint/rules/)
+- [Проверка breaking changes](https://buf.build/docs/breaking/)
+- [Генерация кода](https://buf.build/docs/generate/)
+
+Сохраняйте `protoc` и Makefile как базовый workflow при изучении Buf: цель — понять переход, а не
+скрыть основную protobuf-механику.
