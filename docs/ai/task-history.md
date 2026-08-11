@@ -187,3 +187,58 @@ Keep entries factual and concise.
 - Verification: `command buf format --diff --exit-code`, `make protos`, focused catalog tests, full
   `grpc-playground` tests, and `git diff --check` passed.
 - Notes: `helloworld.proto` required no formatting changes.
+
+## 2026-08-11 — Audit Buf lint warnings
+
+- Scope: Ran `buf lint` against the configured `grpc-playground` module and separately checked the
+  catalog contracts.
+- Result: `catalog/v1` and `catalog/v2` pass lint. The legacy `helloworld` example produces 12
+  warnings covering package path/version, service naming, shared request/response messages, and
+  RPC-specific request/response naming.
+- Decision: All `helloworld` warnings are deferred. Fixing them now would alter the preserved Phase 2
+  teaching example and its generated API/path; they remain documented for a later migration exercise.
+- Verification: `command buf lint --path catalog` passed; full lint and `--path helloworld` reported
+  the expected warnings with non-zero status. No `.proto` or generated files were changed.
+
+## 2026-08-11 — Run Buf breaking-change experiment
+
+- Scope: Compared temporary `catalog.v1` baseline, safe variant, and breaking variant outside the
+  repository module.
+- Safe change: adding `string description = 4` to `Product` passed `buf breaking` with exit code 0.
+- Breaking change: changing `price_cents` from `int64` to `int32` failed with a field type-change
+  violation and exit code 100.
+- Fixture: `/tmp/go-microservices-buf-breaking-oPQ7tS`.
+
+## 2026-08-11 — Compare Buf and protoc Go generation
+
+- Scope: Added `grpc-playground/buf.gen.yaml` with the local `protoc-gen-go` and
+  `protoc-gen-go-grpc` plugins using `paths=source_relative`.
+- Verification: `command buf generate -o /tmp/go-microservices-buf-generate-MQt9Gy` generated all
+  six Go files for `helloworld`, `catalog/v1`, and `catalog/v2`.
+- Comparison: Generated files match the Makefile output in API and descriptors. The only diff is
+  the generated header's protoc version: Makefile output reports `v7.35.1`, while Buf's local plugin
+  invocation reports `(unknown)`.
+- Notes: The repository generated files were not overwritten; the comparison output remains in the
+  temporary directory above.
+
+## 2026-08-11 — Verify reproducible Buf generation
+
+- Scope: Ran `command buf generate` in `grpc-playground` using the new `buf.gen.yaml`.
+- Result: All six tracked generated Go files were updated only in their generator header: Buf writes
+  `protoc (unknown)` where the Makefile workflow writes `protoc v7.35.1`.
+- Reproducibility: A second `command buf generate` produced no additional diff.
+- Verification: Focused catalog tests, full `grpc-playground` tests, and `git diff --check` passed.
+- Decision: Buf is now a verified local generation workflow; the Makefile remains available as the
+  comparison and fallback workflow until the Stage 3B review.
+- Notes: The experiment keeps `package catalog.v1` identical across inputs, unlike the separate
+  production packages `catalog.v1` and `catalog.v2`.
+
+## 2026-08-11 — Test deleted fields and reserved declarations
+
+- Scope: Compared temporary `catalog.v1` variants with `price_cents` deleted, both without and with
+  `reserved 3` and `reserved "price_cents"`.
+- Result: Both variants failed `buf breaking` with exit code 100 because deleting a previously
+  present field is itself a breaking change.
+- Conclusion: `reserved` does not make deletion compatible. It prevents future reuse of the field
+  number and name after the deletion.
+- Fixture: `/tmp/go-microservices-buf-breaking-oPQ7tS`.
