@@ -195,13 +195,26 @@ Apply Buf to a protobuf contract that is already understood and documented.
 
 ### Definition of Done
 
-- a local Buf configuration exists;
-- linting and breaking-change checks run against the learning contract;
-- generated output is reproducible;
-- the Buf and `protoc` workflows are compared in documentation;
-- accepted, fixed, and deferred lint warnings are recorded;
-- no BSR, governance, CI/CD, remote-plugin, ConnectRPC, gateway, OpenAPI, OpenTelemetry, or grpcurl
+- [x] a local Buf configuration exists;
+- [x] linting and breaking-change checks run against the learning contract;
+- [x] generated output is reproducible;
+- [x] the Buf and `protoc` workflows are compared in documentation;
+- [x] accepted, fixed, and deferred lint warnings are recorded;
+- [x] no BSR, governance, CI/CD, remote-plugin, ConnectRPC, gateway, OpenAPI, OpenTelemetry, or grpcurl
   work is included.
+
+### Phase 3B review record
+
+- Configuration: `grpc-playground/buf.yaml` and `grpc-playground/buf.gen.yaml` use local modules and
+  local Go plugins.
+- Lint: `catalog/v1` and `catalog/v2` pass; the 12 legacy `helloworld` warnings are deferred to a
+  later migration exercise.
+- Breaking checks: same-package temporary fixtures verified a compatible field addition and detected
+  an incompatible field-type change and field deletion. `catalog.v1` and `catalog.v2` are separate
+  packages, so they are not compared directly as one API history.
+- Generation: Buf output is reproducible and functionally equivalent to the Makefile/protoc output;
+  only the generated protoc-version comment differs.
+- Boundary: no BSR, CI/CD, remote plugins, governance, or Phase 3C tooling was introduced.
 
 ---
 
@@ -578,12 +591,12 @@ Study these after the main path, not before.
 - [x] Generated-code reference
 - [x] One unary RPC in Go
 - [ ] All 4 RPC types in one demo service
-- [ ] Phase 3B: Buf local CLI workflow
+- [x] Phase 3B: Buf local CLI workflow
 - [ ] grpcurl reflection and unary RPC workflow
 
 ## Next
 - [x] Phase 3A: Proto design and compatibility
-- [ ] Phase 3B: Buf lint, format, breaking, and generate
+- [x] Phase 3B: Buf lint, format, breaking, and generate
 - [ ] Phase 3C: ConnectRPC, grpc-gateway, OpenAPI, grpcurl, and OpenTelemetry
 - [ ] Metadata
 - [ ] Interceptors

@@ -209,6 +209,16 @@ Keep entries factual and concise.
   violation and exit code 100.
 - Fixture: `/tmp/go-microservices-buf-breaking-oPQ7tS`.
 
+## 2026-08-11 — Test deleted fields and reserved declarations
+
+- Scope: Compared temporary `catalog.v1` variants with `price_cents` deleted, both without and with
+  `reserved 3` and `reserved "price_cents"`.
+- Result: Both variants failed `buf breaking` with exit code 100 because deleting a previously
+  present field is itself a breaking change.
+- Conclusion: `reserved` does not make deletion compatible. It prevents future reuse of the field
+  number and name after the deletion.
+- Fixture: `/tmp/go-microservices-buf-breaking-oPQ7tS`.
+
 ## 2026-08-11 — Compare Buf and protoc Go generation
 
 - Scope: Added `grpc-playground/buf.gen.yaml` with the local `protoc-gen-go` and
@@ -251,12 +261,11 @@ Keep entries factual and concise.
 - Notes: The experiment keeps `package catalog.v1` identical across inputs, unlike the separate
   production packages `catalog.v1` and `catalog.v2`.
 
-## 2026-08-11 — Test deleted fields and reserved declarations
+## 2026-08-12 — Close Phase 3B review documentation
 
-- Scope: Compared temporary `catalog.v1` variants with `price_cents` deleted, both without and with
-  `reserved 3` and `reserved "price_cents"`.
-- Result: Both variants failed `buf breaking` with exit code 100 because deleting a previously
-  present field is itself a breaking change.
-- Conclusion: `reserved` does not make deletion compatible. It prevents future reuse of the field
-  number and name after the deletion.
-- Fixture: `/tmp/go-microservices-buf-breaking-oPQ7tS`.
+- Scope: Marked the Phase 3B Definition of Done complete in both roadmaps, added bilingual review
+  records, and documented the same-package breaking-check model and Buf/protoc comparison in both
+  cheatsheets.
+- Boundary: No BSR, CI/CD, remote plugins, governance, or Phase 3C tools were added.
+- Verification: `buf format --diff --exit-code`, `buf lint --path catalog`, `buf generate`, focused
+  catalog tests, full `grpc-playground` tests, and `git diff --check` passed.

@@ -211,13 +211,26 @@ Go](https://grpc.io/docs/languages/go/generated-code/)
 
 ### Definition of Done
 
-- существует локальная Buf-конфигурация;
-- linting и breaking-change проверки запускаются для учебного контракта;
-- generated output воспроизводим;
-- workflow Buf и `protoc` сравнены в документации;
-- принятые, исправленные и отложенные lint warnings зафиксированы;
-- BSR, governance, CI/CD, remote plugins, ConnectRPC, gateway, OpenAPI, OpenTelemetry и grpcurl не
+- [x] существует локальная Buf-конфигурация;
+- [x] linting и breaking-change проверки запускаются для учебного контракта;
+- [x] generated output воспроизводим;
+- [x] workflow Buf и `protoc` сравнены в документации;
+- [x] принятые, исправленные и отложенные lint warnings зафиксированы;
+- [x] BSR, governance, CI/CD, remote plugins, ConnectRPC, gateway, OpenAPI, OpenTelemetry и grpcurl не
   входят в эту подфазу.
+
+### Запись review Phase 3B
+
+- Конфигурация: `grpc-playground/buf.yaml` и `grpc-playground/buf.gen.yaml` используют локальный
+  module и локальные Go-плагины.
+- Lint: `catalog/v1` и `catalog/v2` проходят; 12 legacy warnings `helloworld` отложены до отдельного
+  migration exercise.
+- Breaking checks: временные fixture одного package подтвердили совместимое добавление поля и
+  обнаружили несовместимое изменение типа и удаление поля. `catalog.v1` и `catalog.v2` — разные
+  packages, поэтому напрямую как одну историю API они не сравниваются.
+- Генерация: Buf output воспроизводим и функционально эквивалентен output Makefile/protoc; отличается
+  только комментарий с версией protoc.
+- Граница: BSR, CI/CD, remote plugins, governance и инструменты Phase 3C не добавлялись.
 
 ---
 
@@ -649,13 +662,13 @@ Gateway остаётся адаптером поверх gRPC-сервисов, 
 - [x] Справочник generated-кода
 - [x] Один unary RPC на Go
 - [ ] Все 4 типа RPC в одном демонстрационном сервисе
-- [ ] Phase 3B: локальный workflow Buf CLI
+- [x] Phase 3B: локальный workflow Buf CLI
 - [ ] grpcurl: reflection и unary RPC workflow
 
 ## Далее
 
 - [x] Phase 3A: проектирование Proto и совместимость
-- [ ] Phase 3B: Buf lint, format, breaking и generate
+- [x] Phase 3B: Buf lint, format, breaking и generate
 - [ ] Phase 3C: ConnectRPC, grpc-gateway, OpenAPI, grpcurl и OpenTelemetry
 - [ ] Metadata
 - [ ] Interceptors

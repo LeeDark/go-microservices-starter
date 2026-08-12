@@ -274,6 +274,13 @@ Buf is introduced after the protobuf contract is understood.
 The current module has no protobuf imports, so it has no external Buf dependencies or `buf.lock` yet.
 The existing `protoc` + Makefile workflow remains available for comparison and fallback.
 
+Breaking checks compare different revisions of the same package. The versioned `catalog.v1` and
+`catalog.v2` packages are separate API histories, so the experiment used temporary same-package
+fixtures: adding a field passed, while changing a field type or deleting a field failed.
+
+Buf generation is functionally equivalent to the current Makefile/protoc output. The only observed
+difference is the generated header's protoc version comment (`v7.35.1` versus `(unknown)`).
+
 ## Phase 3 map
 
 - **Phase 3A — Protobuf contract design:** learn `.proto`, compatibility, `v1`/`v2`, and generated
