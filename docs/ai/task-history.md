@@ -230,6 +230,24 @@ Keep entries factual and concise.
 - Verification: Focused catalog tests, full `grpc-playground` tests, and `git diff --check` passed.
 - Decision: Buf is now a verified local generation workflow; the Makefile remains available as the
   comparison and fallback workflow until the Stage 3B review.
+
+## 2026-08-12 — Audit Buf versions and dependencies
+
+- Scope: Audited the local Buf module and generation configuration before introducing dependency
+  management.
+- Versions: Buf 1.72.0, `protoc-gen-go` v1.36.11, and `protoc-gen-go-grpc` 1.6.2.
+- Dependencies: No `.proto` file imports another protobuf module; `buf dep graph` shows only the local
+  module, so no `buf.lock` is needed yet.
+- Documentation: Added a concise Phase 3B Buf workflow and dependency note to both cheatsheets.
+- Notes: BSR, remote modules, and remote plugins remain outside the current local workflow.
+
+## 2026-08-12 — Fix cheatsheet heading hierarchy
+
+- Scope: Added a shared `gRPC Playground` document title, made Phases 1–3 and the Phase 3 map H2
+  sections, and made their internal sections H3 in both cheatsheets.
+- Result: Each cheatsheet has one descriptive H1 and a consistent internal hierarchy, resolving
+  `MD025/single-title/single-h1`.
+- Verification: Confirmed the heading levels and `git diff --check` passed.
 - Notes: The experiment keeps `package catalog.v1` identical across inputs, unlike the separate
   production packages `catalog.v1` and `catalog.v2`.
 
