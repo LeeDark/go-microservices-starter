@@ -1,12 +1,14 @@
-# Phase 1 — Core gRPC foundation
+# gRPC Playground — Go gRPC & Protobuf Learning Notes
 
-## Study
+## Phase 1 — Core gRPC foundation
+
+### Study
 
 - [Introduction to gRPC](https://grpc.io/docs/what-is-grpc/introduction/)
 - [Core concepts, architecture and lifecycle](https://grpc.io/docs/what-is-grpc/core-concepts/)
 - [RPC life cycle](https://grpc.io/docs/what-is-grpc/core-concepts/#rpc-life-cycle)
 
-## What is gRPC?
+### What is gRPC?
 
 gRPC is an open-source Remote Procedure Call (RPC) framework. A client can call a method on a server
 running on another machine as if it were a local method. The service contract defines which methods
@@ -16,7 +18,7 @@ gRPC is useful for communication between services, especially when clients and s
 in different languages. It provides generated, idiomatic client and server APIs and supports unary
 and streaming calls.
 
-## When would I prefer it over REST?
+### When would I prefer it over REST?
 
 Choose gRPC when services need a strongly typed contract, generated clients, and efficient
 service-to-service communication. It is also a natural fit when streaming is part of the API.
@@ -25,7 +27,7 @@ REST/JSON is often a better fit for public HTTP APIs, simple integrations, and d
 clients. The two approaches can coexist: the choice depends on the consumers and API requirements,
 rather than one replacing the other.
 
-## What are the 4 RPC types?
+### What are the 4 RPC types?
 
 - **Unary RPC**: the client sends one request and receives one response.
 - **Server-streaming RPC**: the client sends one request and receives an ordered stream of
@@ -34,7 +36,7 @@ rather than one replacing the other.
   response.
 - **Bidirectional-streaming RPC**: both sides send ordered streams independently.
 
-## Core concepts
+### Core concepts
 
 - A **service** defines a remote API in a `.proto` file.
 - A **method** is an RPC operation in that service, with request and response message types.
@@ -44,13 +46,13 @@ rather than one replacing the other.
   The `protoc` compiler and gRPC plugins generate Go message types plus client and server APIs from
   a `.proto` contract.
 
-## Unary and streaming calls
+### Unary and streaming calls
 
 A unary RPC has one request and one response, so it is the closest to a normal function call. A
 streaming RPC allows the client, server, or both to exchange multiple messages. gRPC preserves
 message order within each individual stream.
 
-## How a call works
+### How a call works
 
 1. The client calls a generated stub (called a client in Go) with a request message and, optionally,
    a deadline.
@@ -64,15 +66,15 @@ message order within each individual stream.
    a call; the client deadline can end it with `DEADLINE_EXCEEDED`. Changes made before cancellation
    are not rolled back.
 
-# Phase 2 — gRPC in Go
+## Phase 2 — gRPC in Go
 
-## Study
+### Study
 
 - [Quick start | Go](https://grpc.io/docs/languages/go/quickstart/) - [Basics tutorial |
 Go](https://grpc.io/docs/languages/go/basics/) - [Generated-code reference |
 Go](https://grpc.io/docs/languages/go/generated-code/)
 
-## Toolchain and code generation
+### Toolchain and code generation
 
 A Go gRPC project needs Go, the Protocol Buffers compiler (`protoc`), and two Go plugins:
 
@@ -113,7 +115,7 @@ or updates:
 Do not edit generated `*.pb.go` files by hand. Change the `.proto` contract, then run `protoc`
 again.
 
-## From contract to running application
+### From contract to running application
 
 The current example follows this flow:
 
@@ -136,7 +138,7 @@ The generated client method has this shape:
 Method(ctx context.Context, request *Request, opts ...grpc.CallOption) (*Response, error)
 ```
 
-## Server structure
+### Server structure
 
 The server implementation in `helloworld/greeter_server/main.go`:
 
@@ -147,7 +149,7 @@ The server implementation in `helloworld/greeter_server/main.go`:
 5. registers the implementation with `pb.RegisterGreeterServer`;
 6. blocks in `Serve` while it accepts and dispatches RPCs.
 
-## Client structure
+### Client structure
 
 The client in `helloworld/greeter_client/main.go`:
 
@@ -160,14 +162,14 @@ The client in `helloworld/greeter_client/main.go`:
 `insecure.NewCredentials()` is suitable for this local learning example only. Use transport security
 and appropriate credentials for a real service.
 
-## Generated streaming APIs: preview
+### Generated streaming APIs: preview
 
 Newly generated Go streaming APIs use generics. Client RPC calls and server RPC handlers are safe to
 run in concurrent goroutines. Within one stream, however, do not perform concurrent reads or
 concurrent writes; one read and one write can proceed independently. Streaming implementation
 belongs to Phase 4.
 
-# Phase 3A — Compatibility rules
+## Phase 3A — Compatibility rules
 
 Treat the `.proto` schema as a long-lived API contract.
 
@@ -189,7 +191,7 @@ Do not confuse a source-level rename with a wire-compatible change: the field nu
 meaning are what matter. Detailed `v1`/`v2` practice belongs to Phase 3A; Buf validation starts in
 Phase 3B.
 
-## Phase 3A — `catalog.v1` and `catalog.v2`
+### Phase 3A — `catalog.v1` and `catalog.v2`
 
 The learning contract is a small `CatalogService` with two unary methods:
 
@@ -227,7 +229,7 @@ The contracts live in `catalog/v1/catalog.proto` and `catalog/v2/catalog.proto`.
 regenerates both versions through separate targets while the current generated Go output is being
 verified before focused tests are added.
 
-## Phase 3A — Focused contract tests
+### Phase 3A — Focused contract tests
 
 Focused tests for `catalog.v1` and `catalog.v2` live in `catalog/v1/catalog_test.go`. They test the
 contract directly without starting a server, opening a port, or requiring an external service.
@@ -258,7 +260,28 @@ Phase 3A is complete. The `catalog.v1` and `catalog.v2` contracts, generated Go 
 regeneration targets, and focused compatibility tests are in place. Buf and the Phase 3C tools
 intentionally remain outside this phase.
 
-# Phase 3 map
+## Phase 3B — Buf contract workflow
+
+Buf is introduced after the protobuf contract is understood.
+
+- `buf.yaml` — local module, lint, and breaking configuration;
+- `buf.gen.yaml` — local Go plugins and generated output configuration;
+- `buf format` — consistent protobuf formatting;
+- `buf lint` — contract and style checks;
+- `buf breaking` — compatibility checks between contract versions;
+- `buf generate` — reproducible Go code generation.
+
+The current module has no protobuf imports, so it has no external Buf dependencies or `buf.lock` yet.
+The existing `protoc` + Makefile workflow remains available for comparison and fallback.
+
+Breaking checks compare different revisions of the same package. The versioned `catalog.v1` and
+`catalog.v2` packages are separate API histories, so the experiment used temporary same-package
+fixtures: adding a field passed, while changing a field type or deleting a field failed.
+
+Buf generation is functionally equivalent to the current Makefile/protoc output. The only observed
+difference is the generated header's protoc version comment (`v7.35.1` versus `(unknown)`).
+
+## Phase 3 map
 
 - **Phase 3A — Protobuf contract design:** learn `.proto`, compatibility, `v1`/`v2`, and generated
   Go API using only `protoc` and the Makefile.

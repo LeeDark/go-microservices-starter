@@ -158,3 +158,114 @@ Keep entries factual and concise.
   go test ./catalog/...`, `GOCACHE=/tmp/go-microservices-starter-gocache go test ./...`, and `git
   diff --check` successfully.
 - Notes: Phase 3A is closed; Buf work begins in Phase 3B.
+
+## 2026-08-11 — Establish Phase 3B protoc baseline
+
+- Scope: Verified the existing `protoc` + Makefile workflow before introducing Buf.
+- Baseline: `protoc` 35.1, `protoc-gen-go` v1.36.11, `protoc-gen-go-grpc` 1.6.2, and Go 1.26.4.
+- Generation: `grpc-playground/Makefile` regenerates `helloworld`, `catalog/v1`, and `catalog/v2`
+  through the aggregate `protos` target with source-relative paths.
+- Verification: `make protos`, focused `catalog` tests, full `grpc-playground` tests, and
+  `git diff --check` passed; regeneration produced no working-tree changes.
+- Notes: This baseline is the comparison point for Buf format, lint, breaking, and generate.
+
+## 2026-08-11 — Initialize Phase 3B Buf module configuration
+
+- Scope: Added a local `grpc-playground/buf.yaml` using Buf configuration v2 and the standard lint
+  and file-level breaking profiles.
+- Verification: Buf 1.72.0 discovered `helloworld/helloworld/helloworld.proto`,
+  `catalog/v1/catalog.proto`, and `catalog/v2/catalog.proto`; `command buf lint` ran successfully
+  and reported the expected existing `helloworld` naming and package warnings.
+- Notes: No `.proto` contracts or generated Go files were changed. The warnings remain for the
+  planned lint review step.
+
+## 2026-08-11 — Apply Buf formatting to catalog contracts
+
+- Scope: Applied `buf format` to `catalog/v1/catalog.proto` and `catalog/v2/catalog.proto`.
+- Changes: Normalized indentation, `go_package` formatting, and final newlines; no contract meaning,
+  package, field number, or service API was changed.
+- Verification: `command buf format --diff --exit-code`, `make protos`, focused catalog tests, full
+  `grpc-playground` tests, and `git diff --check` passed.
+- Notes: `helloworld.proto` required no formatting changes.
+
+## 2026-08-11 — Audit Buf lint warnings
+
+- Scope: Ran `buf lint` against the configured `grpc-playground` module and separately checked the
+  catalog contracts.
+- Result: `catalog/v1` and `catalog/v2` pass lint. The legacy `helloworld` example produces 12
+  warnings covering package path/version, service naming, shared request/response messages, and
+  RPC-specific request/response naming.
+- Decision: All `helloworld` warnings are deferred. Fixing them now would alter the preserved Phase 2
+  teaching example and its generated API/path; they remain documented for a later migration exercise.
+- Verification: `command buf lint --path catalog` passed; full lint and `--path helloworld` reported
+  the expected warnings with non-zero status. No `.proto` or generated files were changed.
+
+## 2026-08-11 — Run Buf breaking-change experiment
+
+- Scope: Compared temporary `catalog.v1` baseline, safe variant, and breaking variant outside the
+  repository module.
+- Safe change: adding `string description = 4` to `Product` passed `buf breaking` with exit code 0.
+- Breaking change: changing `price_cents` from `int64` to `int32` failed with a field type-change
+  violation and exit code 100.
+- Fixture: `/tmp/go-microservices-buf-breaking-oPQ7tS`.
+
+## 2026-08-11 — Test deleted fields and reserved declarations
+
+- Scope: Compared temporary `catalog.v1` variants with `price_cents` deleted, both without and with
+  `reserved 3` and `reserved "price_cents"`.
+- Result: Both variants failed `buf breaking` with exit code 100 because deleting a previously
+  present field is itself a breaking change.
+- Conclusion: `reserved` does not make deletion compatible. It prevents future reuse of the field
+  number and name after the deletion.
+- Fixture: `/tmp/go-microservices-buf-breaking-oPQ7tS`.
+
+## 2026-08-11 — Compare Buf and protoc Go generation
+
+- Scope: Added `grpc-playground/buf.gen.yaml` with the local `protoc-gen-go` and
+  `protoc-gen-go-grpc` plugins using `paths=source_relative`.
+- Verification: `command buf generate -o /tmp/go-microservices-buf-generate-MQt9Gy` generated all
+  six Go files for `helloworld`, `catalog/v1`, and `catalog/v2`.
+- Comparison: Generated files match the Makefile output in API and descriptors. The only diff is
+  the generated header's protoc version: Makefile output reports `v7.35.1`, while Buf's local plugin
+  invocation reports `(unknown)`.
+- Notes: The repository generated files were not overwritten; the comparison output remains in the
+  temporary directory above.
+
+## 2026-08-11 — Verify reproducible Buf generation
+
+- Scope: Ran `command buf generate` in `grpc-playground` using the new `buf.gen.yaml`.
+- Result: All six tracked generated Go files were updated only in their generator header: Buf writes
+  `protoc (unknown)` where the Makefile workflow writes `protoc v7.35.1`.
+- Reproducibility: A second `command buf generate` produced no additional diff.
+- Verification: Focused catalog tests, full `grpc-playground` tests, and `git diff --check` passed.
+- Decision: Buf is now a verified local generation workflow; the Makefile remains available as the
+  comparison and fallback workflow until the Stage 3B review.
+
+## 2026-08-12 — Audit Buf versions and dependencies
+
+- Scope: Audited the local Buf module and generation configuration before introducing dependency
+  management.
+- Versions: Buf 1.72.0, `protoc-gen-go` v1.36.11, and `protoc-gen-go-grpc` 1.6.2.
+- Dependencies: No `.proto` file imports another protobuf module; `buf dep graph` shows only the local
+  module, so no `buf.lock` is needed yet.
+- Documentation: Added a concise Phase 3B Buf workflow and dependency note to both cheatsheets.
+- Notes: BSR, remote modules, and remote plugins remain outside the current local workflow.
+
+## 2026-08-12 — Fix cheatsheet heading hierarchy
+
+- Scope: Added a shared `gRPC Playground` document title, made Phases 1–3 and the Phase 3 map H2
+  sections, and made their internal sections H3 in both cheatsheets.
+- Result: Each cheatsheet has one descriptive H1 and a consistent internal hierarchy, resolving
+  `MD025/single-title/single-h1`.
+- Verification: Confirmed the heading levels and `git diff --check` passed.
+- Notes: The experiment keeps `package catalog.v1` identical across inputs, unlike the separate
+  production packages `catalog.v1` and `catalog.v2`.
+
+## 2026-08-12 — Close Phase 3B review documentation
+
+- Scope: Marked the Phase 3B Definition of Done complete in both roadmaps, added bilingual review
+  records, and documented the same-package breaking-check model and Buf/protoc comparison in both
+  cheatsheets.
+- Boundary: No BSR, CI/CD, remote plugins, governance, or Phase 3C tools were added.
+- Verification: `buf format --diff --exit-code`, `buf lint --path catalog`, `buf generate`, focused
+  catalog tests, full `grpc-playground` tests, and `git diff --check` passed.
